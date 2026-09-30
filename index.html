@@ -1,6 +1,6 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>برنامج تأييد الحضور</title>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#315743"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><title>برنامج تأييد الحضور</title>
 <style>
 :root{--g:#315743;--g2:#557a5b;--bg:#eef3ea;--card:#fff;--tx:#29372f;--line:#dce5d9;--red:#a64e45;--gold:#aa8447;--soft:#e2ebdf;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17201b;--card:#212d26;--tx:#e6eee8;--line:#33443a;--soft:#2d3d33;--g:#8fc09b}}
@@ -36,16 +36,20 @@ tr.sel{background:#aa844722}.th{width:38px;height:44px;object-fit:cover;border-r
 .sec{color:#3e9a58;font-size:13px;font-weight:bold;margin-top:16px}
 .bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
 .fb{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;display:inline-block;padding:10px 12px;border-radius:9px;font-size:13px;font-weight:bold;cursor:pointer;margin:0;width:auto;white-space:nowrap}.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);pointer-events:none}#toast{position:fixed;z-index:99;right:12px;left:12px;top:calc(env(safe-area-inset-top,0px) + 8px);background:#222;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;text-align:center;box-shadow:0 6px 20px #0005}.bad{border-color:#c0574c!important}
+#viewer{position:fixed;inset:0;z-index:100;background:#000;display:flex;flex-direction:column}
+.vbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:#fff;font-size:12px;padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 8px}
+.vbox{flex:1;overflow:auto;display:flex}#vimg{margin:auto;max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in}#vimg.full{max-width:none;max-height:none;object-fit:none;cursor:zoom-out}
 .hidden{display:none!important}
 @media(max-width:900px){.form{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:650px){.form{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:430px){.form{grid-template-columns:1fr}}
-</style></head><body><div id="toast" class="hidden"></div>
+</style></head><body><div id="viewer" class="hidden"><div class="vbar"><button class="del" id="vclose">✕ إغلاق</button><a class="clr fb" id="vdl">⬇ تحميل الأصلية</a><span id="vinfo"></span></div><div class="vbox"><img id="vimg" alt=""></div></div>
+<div id="toast" class="hidden"></div>
 <div id="login"><div class="lc"><div class="ic"><div class="ck">✓</div></div><div class="lt" id="ltitle">تسجيل الدخول</div><p class="ls" id="lsub">أدخل اسم المستخدم وكلمة السر للمتابعة</p><input id="lu" placeholder="اسم المستخدم" autocomplete="username"><input id="lp" type="password" placeholder="كلمة السر" autocomplete="current-password"><button class="add big" id="lbtn">دخول</button><div id="lmsg" class="st"></div><button class="clr big" id="setupBtn" style="margin-top:12px">أول استخدام؟ أنشئ حساب المدير</button><div class="sec">🔒 محمي ومؤمّن</div></div></div>
 <div class="wrap hidden" id="app">
 <div class="hd"><h1>🌿 برنامج تأييد الحضور</h1><p><span id="dot" class="live"></span><span id="conn">جارٍ الاتصال…</span> — أي إضافة تظهر فورًا على جميع الأجهزة</p></div>
 
-<div class="card bar"><span>المستخدم: <b id="me"></b> — <b id="role"></b></span><button class="clr" id="out">تسجيل الخروج</button></div>
+<div class="card bar"><span>المستخدم: <b id="me"></b> — <b id="role"></b></span><button class="clr hidden" id="installBtn">📲 تثبيت البرنامج</button><button class="clr" id="out">تسجيل الخروج</button></div>
 <div class="card" id="formCard"><h2>بيانات الشهيد أو المصاب والمستفيد</h2><div class="form">
 <div><label>اسم شهيد أو مصاب</label><input id="personName"></div>
 <div><label>الحالة</label><select id="statusType"><option value="">اختر</option><option>شهيد</option><option>شهيدة</option><option>مصاب</option><option>مصابه</option></select></div>
@@ -56,7 +60,7 @@ tr.sel{background:#aa844722}.th{width:38px;height:44px;object-fit:cover;border-r
 <div><label>تاريخ الميلاد</label><input id="birthDate" type="date"></div>
 <div><label>تاريخ الحضور</label><input id="attendanceDate" type="date"></div>
 <div style="grid-column:span 2"><label>الصورة الشخصية (اختيارية)</label><div class="ph"><label class="clr fb" for="photoInput">🖼️ المعرض</label><label class="clr fb" for="camInput">📷 كاميرا</label><input id="photoInput" class="vh" type="file" accept="image/*"><input id="camInput" class="vh" type="file" accept="image/*" capture="environment"><div id="pv" class="pv">صورة</div></div></div></div>
-<div class="acts"><button class="add" id="addBtn">＋ إضافة</button><button class="edit hidden" id="editBtn">✎ تعديل</button><button class="del hidden" id="delBtn">✕ حذف</button><button class="clr" id="clrBtn">↺ تفريغ</button></div>
+<div class="acts"><button class="add" id="addBtn">＋ إضافة</button><button class="edit hidden" id="editBtn">✎ تعديل</button><button class="del hidden" id="delBtn">✕ حذف</button><button class="clr" id="clrBtn">↺ تفريغ</button><button class="clr hidden" id="viewBtn">🖼️ عرض الصورة</button></div>
 <div id="status" class="st"></div></div>
 
 <div class="card"><h2>البحث</h2><div style="display:flex;gap:8px"><input id="search" placeholder="الاسم أو المستفيد أو رقم الموحدة أو محل النفوس…"><button class="clr" id="clrSearch">مسح</button></div></div>
@@ -75,7 +79,7 @@ const $=id=>document.getElementById(id),val=id=>$(id).value.trim();
 const F=["personName","statusType","beneficiary","relation","unified","district","birthDate","attendanceDate"];
 const LB={personName:"اسم الشهيد أو المصاب",statusType:"الحالة",beneficiary:"اسم المستفيد",relation:"صلة القرابة",unified:"رقم الموحدة",district:"محل النفوس",birthDate:"تاريخ الميلاد",attendanceDate:"تاريخ الحضور"};
 const RN={user:"مستخدم",editor:"محرر",admin:"مدير"};
-let records=[],selId=null,photo="",canEdit=false,canDel=false,me=null,started=false,busy=false,setup=false,tt,armed={};
+let records=[],selId=null,photo="",photoFile=null,cur=null,upBusy=false,canEdit=false,canDel=false,me=null,started=false,busy=false,setup=false,tt,armed={};
 const RC=collection(fs,"records");
 function say(t,ok){$("status").textContent=t;$("status").style.color=ok?"#3e8a55":"#c0574c";const o=$("toast");o.textContent=t;o.style.background=ok?"#2f7a4a":"#a64e45";o.classList.remove("hidden");clearTimeout(tt);tt=setTimeout(()=>o.classList.add("hidden"),4500)}
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
@@ -84,27 +88,50 @@ const lmsg=t=>{$("lmsg").textContent=t;$("lmsg").style.color="#c0574c"};
 async function mail(n){const h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(n.trim().toLowerCase()));return [...new Uint8Array(h)].slice(0,16).map(b=>b.toString(16).padStart(2,"0")).join("")+"@tayid.app"}
 const norm=s=>String(s||"").replace(/[\u064B-\u065F\u0640]/g,"").replace(/[أإآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/\s+/g," ").trim().toLowerCase();
 function ask(k,m){if(armed[k]&&Date.now()-armed[k]<5000){delete armed[k];return true}armed[k]=Date.now();say(m);return false}
-function shrink(file){return new Promise((res,rej)=>{const r=new FileReader();r.onerror=rej;r.onload=()=>{const i=new Image();i.onerror=rej;i.onload=()=>{const k=Math.min(1,260/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.7))};i.src=r.result};r.readAsDataURL(file)})}
-["photoInput","camInput"].forEach(i=>$(i).onchange=async e=>{const f=e.target.files[0];if(!f)return;try{photo=await shrink(f);showPhoto();say("تم اختيار الصورة.",true)}catch(_){say("تعذّر قراءة الصورة.")}});
+function shrink(file){return new Promise((res,rej)=>{const r=new FileReader();r.onerror=rej;r.onload=()=>{const i=new Image();i.onerror=rej;i.onload=()=>{const k=Math.min(1,360/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.8))};i.src=r.result};r.readAsDataURL(file)})}
+["photoInput","camInput"].forEach(i=>$(i).onchange=async e=>{const f=e.target.files[0];if(!f)return;if(f.size>15*1048576)return say("حجم الصورة "+(f.size/1048576).toFixed(1)+" ميغابايت، والحد الأقصى 15.");photoFile=f;try{photo=await shrink(f)}catch(_){photo=""}showPhoto();syncView();say("تم اختيار الصورة بجودتها الأصلية ("+(f.size/1048576).toFixed(1)+" MB).",true)});
 function showPhoto(){$("pv").innerHTML=photo?'<img src="'+photo+'">':"صورة"}
 function data(){const d={};F.forEach(k=>d[k]=val(k));return d}
 function ok(d){F.forEach(k=>$(k).classList.remove("bad"));const m=F.filter(k=>!d[k]);if(m.length){m.forEach(k=>$(k).classList.add("bad"));say("أكمل الحقول: "+m.map(k=>LB[k]).join("، "));$(m[0]).scrollIntoView({block:"center",behavior:"smooth"});return false}return true}
-function clearForm(){F.forEach(k=>$(k).value="");$("photoInput").value="";$("camInput").value="";photo="";selId=null;showPhoto();render()}
+function clearForm(){F.forEach(k=>$(k).value="");$("photoInput").value="";$("camInput").value="";photo="";photoFile=null;cur=null;selId=null;showPhoto();syncView();render()}
 async function guard(fn){try{await fn()}catch(e){say(err(e))}}
-async function dup(name,except){const s=await getDocs(query(RC,where("benKey","==",norm(name)))),d=s.docs.find(x=>x.id!==except);return d?d.data():null}
-function dupMsg(d,p){$("beneficiary").classList.add("bad");say("⚠ اسم المستفيد «"+d.beneficiary+"» مسجّل مسبقًا (للشهيد/المصاب: "+p.personName+"). لا يمكن تكرار المستفيد.")}
-$("addBtn").onclick=()=>guard(async()=>{const d=data();if(!ok(d))return;const p=await dup(d.beneficiary);if(p)return dupMsg(d,p);await addDoc(RC,{...d,benKey:norm(d.beneficiary),photo,createdAt:Date.now(),by:me.name});clearForm();say("✓ تمت الإضافة.",true);setTimeout(()=>document.querySelector(".tw").scrollIntoView({behavior:"smooth"}),300)});
-$("editBtn").onclick=()=>guard(async()=>{if(!selId)return say("اختر سجلًا من الجدول أولًا.");const d=data();if(!ok(d))return;const p=await dup(d.beneficiary,selId);if(p)return dupMsg(d,p);await updateDoc(doc(fs,"records",selId),{...d,benKey:norm(d.beneficiary),photo,updatedAt:Date.now()});say("تم التعديل.",true)});
-$("delBtn").onclick=()=>guard(async()=>{if(!selId)return say("اختر سجلًا من الجدول أولًا، أو استخدم زر «حذف» داخل الجدول.");if(!ask("d"+selId,"اضغط «حذف» مرة أخرى للتأكيد."))return;await deleteDoc(doc(fs,"records",selId));clearForm();say("تم الحذف.",true)});
-window.delRow=id=>guard(async()=>{if(!ask("d"+id,"اضغط «حذف» مرة أخرى للتأكيد."))return;await deleteDoc(doc(fs,"records",id));if(selId===id)clearForm();say("تم الحذف.",true)});
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+const srt=s=>s.split(" ").sort().join(" ");
+function dup(name,except){const n=norm(name);let sim=null;for(const r of records){if(r.id===except)continue;const o=norm(r.beneficiary);if(o===n||srt(o)===srt(n))return{r,exact:true};const t=Math.max(2,Math.round(Math.min(o.length,n.length)*.15));if(lev(o,n)<=t||lev(srt(o),srt(n))<=t)sim=sim||{r,exact:false}}return sim}
+function dupMsg(d,x,key){$("beneficiary").classList.add("bad");const t=" «"+x.r.beneficiary+"» (للشهيد/المصاب: "+x.r.personName+")";if(x.exact){say("⛔ اسم المستفيد «"+d.beneficiary+"» مسجّل مسبقًا"+t+". لا يمكن تكراره.");return true}return !ask(key,"⚠ يوجد اسم مشابه جدًا:"+t+". إن كان شخصًا مختلفًا فاضغط الحفظ مرة أخرى للتأكيد.")}
+const CH=700000,rid8=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+function syncView(){$("viewBtn").classList.toggle("hidden",!(photoFile||photo||(cur&&cur.photoId)))}
+async function uploadPhoto(file,pid,onp){const url=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});const b=url.slice(url.indexOf(",")+1),n=Math.ceil(b.length/CH);
+ try{for(let i=0;i<n;i+=3){const bt=writeBatch(fs);for(let j=i;j<Math.min(n,i+3);j++)bt.set(doc(fs,"photoChunks",pid+"_"+j),{pid,i:j,d:b.slice(j*CH,(j+1)*CH)});await bt.commit();onp(Math.min(n,i+3),n)}}catch(e){delChunks(pid,n);throw e}return n}
+const delChunks=(pid,n)=>Promise.all(Array.from({length:n},(_,i)=>deleteDoc(doc(fs,"photoChunks",pid+"_"+i)).catch(()=>{})));
+const imgCache={};
+async function loadOriginal(r){if(imgCache[r.photoId])return imgCache[r.photoId];const s=await getDocs(query(collection(fs,"photoChunks"),where("pid","==",r.photoId)));const b=s.docs.map(d=>d.data()).sort((x,y)=>x.i-y.i).map(x=>x.d).join("");if(s.size<(r.photoN||1))throw new Error("الصورة الأصلية غير مكتملة.");const blob=await (await fetch("data:"+(r.photoType||"image/jpeg")+";base64,"+b)).blob();return imgCache[r.photoId]=URL.createObjectURL(blob)}
+function showV(src,info,dl,name){$("vimg").src=src;$("vimg").classList.remove("full");$("vinfo").textContent=info;if(dl){$("vdl").href=dl;$("vdl").download=name||"photo.jpg";$("vdl").classList.remove("hidden")}else $("vdl").classList.add("hidden");$("viewer").classList.remove("hidden")}
+window.openViewer=async id=>{const r=records.find(x=>x.id===id);if(!r)return;const ext=(r.photoType||"image/jpeg").split("/")[1]||"jpg";
+ if(!r.photoId){if(r.photo)showV(r.photo,"نسخة مصغّرة فقط (سجل قديم). لتحسينها: تعديل ثم اختر الصورة الأصلية.");return}
+ showV(r.photo||"","جارٍ تحميل الصورة الأصلية…");try{const u=await loadOriginal(r);showV(u,"الأصلية "+(r.photoSize/1048576).toFixed(1)+" MB — اضغط الصورة للتكبير",u,(r.personName||"photo")+"."+ext)}catch(e){$("vinfo").textContent=err(e)}};
+function openCurrent(){if(photoFile){const u=URL.createObjectURL(photoFile);showV(u,"الصورة الأصلية (لم تُحفظ بعد)",u,photoFile.name)}else if(cur&&cur.photoId)openViewer(cur.id);else if(photo)showV(photo,"نسخة مصغّرة فقط")}
+$("viewBtn").onclick=openCurrent;$("pv").onclick=openCurrent;$("vclose").onclick=()=>$("viewer").classList.add("hidden");$("vimg").onclick=e=>e.target.classList.toggle("full");
+async function withUp(fn){if(upBusy)return say("انتظر انتهاء الرفع.");upBusy=true;try{await fn()}finally{upBusy=false}}
+$("addBtn").onclick=()=>guard(()=>withUp(async()=>{const d=data();if(!ok(d))return;const x=dup(d.beneficiary);if(x&&dupMsg(d,x,"dupadd"))return;
+ const rec={...d,benKey:norm(d.beneficiary),photo,createdAt:Date.now(),by:me.name};
+ if(photoFile){const pid=rid8();rec.photoId=pid;rec.photoN=await uploadPhoto(photoFile,pid,(a,b)=>say("رفع الصورة بجودتها الأصلية "+a+"/"+b+"…",true));rec.photoType=photoFile.type||"image/jpeg";rec.photoSize=photoFile.size}
+ await addDoc(RC,rec);clearForm();say("✓ تمت الإضافة.",true);setTimeout(()=>document.querySelector(".tw").scrollIntoView({behavior:"smooth"}),300)}));
+$("editBtn").onclick=()=>guard(()=>withUp(async()=>{if(!selId)return say("اختر سجلًا من الجدول أولًا.");const d=data();if(!ok(d))return;const x=dup(d.beneficiary,selId);if(x&&dupMsg(d,x,"dupedit"+selId))return;
+ const upd={...d,benKey:norm(d.beneficiary),updatedAt:Date.now()};let old=null;
+ if(photoFile){const pid=rid8();upd.photoId=pid;upd.photoN=await uploadPhoto(photoFile,pid,(a,b)=>say("رفع الصورة بجودتها الأصلية "+a+"/"+b+"…",true));upd.photoType=photoFile.type||"image/jpeg";upd.photoSize=photoFile.size;upd.photo=photo;if(cur&&cur.photoId)old={pid:cur.photoId,n:cur.photoN}}
+ await updateDoc(doc(fs,"records",selId),upd);if(old)delChunks(old.pid,old.n);clearForm();say("تم التعديل.",true)}));
+const rmRec=async id=>{const r=records.find(x=>x.id===id);await deleteDoc(doc(fs,"records",id));if(r&&r.photoId)delChunks(r.photoId,r.photoN||0)};
+$("delBtn").onclick=()=>guard(async()=>{if(!selId)return say("اختر سجلًا من الجدول أولًا، أو استخدم زر «حذف» داخل الجدول.");if(!ask("d"+selId,"اضغط «حذف» مرة أخرى للتأكيد."))return;await rmRec(selId);clearForm();say("تم الحذف.",true)});
+window.delRow=id=>guard(async()=>{if(!ask("d"+id,"اضغط «حذف» مرة أخرى للتأكيد."))return;await rmRec(id);if(selId===id)clearForm();say("تم الحذف.",true)});
 $("clrBtn").onclick=clearForm;$("clrSearch").onclick=()=>{$("search").value="";render()};$("search").oninput=render;
-window.pick=id=>{const r=records.find(x=>x.id===id);if(!r)return;selId=id;F.forEach(k=>$(k).value=r[k]||"");photo=r.photo||"";showPhoto();render();scrollTo({top:0,behavior:"smooth"})};
+window.pick=id=>{const r=records.find(x=>x.id===id);if(!r)return;selId=id;cur=r;photoFile=null;F.forEach(k=>$(k).value=r[k]||"");photo=r.photo||"";showPhoto();syncView();render();scrollTo({top:0,behavior:"smooth"})};
 function render(){
  const q=val("search").toLowerCase(),f=records.filter(r=>["personName","statusType","beneficiary","relation","unified","district"].some(k=>String(r[k]||"").toLowerCase().includes(q)));
  $("total").textContent=records.length;
  $("martyrs").textContent=records.filter(r=>["شهيد","شهيدة"].includes(r.statusType)).length;
  $("injured").textContent=records.filter(r=>["مصاب","مصابه"].includes(r.statusType)).length;
- $("tbody").innerHTML=f.length?f.map((r,i)=>'<tr class="'+(r.id===selId?"sel":"")+'"><td>'+(i+1)+'</td><td>'+(r.photo?'<img class="th" src="'+r.photo+'">':"—")+'</td><td>'+esc(r.personName)+'</td><td>'+esc(r.statusType)+'</td><td>'+esc(r.beneficiary)+'</td><td>'+esc(r.relation)+'</td><td>'+esc(r.unified)+'</td><td>'+esc(r.district)+'</td><td>'+esc(r.birthDate)+'</td><td>'+esc(r.attendanceDate)+'</td><td><button class="clr" onclick="pick(\''+esc(r.id)+'\')">'+(canEdit?"تعديل":"عرض")+'</button>'+(canDel?' <button class="del" onclick="delRow(\''+esc(r.id)+'\')">حذف</button>':"")+'</td></tr>').join(""):"<tr><td colspan='11'>لا توجد سجلات.</td></tr>";
+ $("tbody").innerHTML=f.length?f.map((r,i)=>'<tr class="'+(r.id===selId?"sel":"")+'"><td>'+(i+1)+'</td><td>'+(r.photo?'<img class="th" style="cursor:pointer" onclick="openViewer(\''+esc(r.id)+'\')" src="'+r.photo+'">':"—")+'</td><td>'+esc(r.personName)+'</td><td>'+esc(r.statusType)+'</td><td>'+esc(r.beneficiary)+'</td><td>'+esc(r.relation)+'</td><td>'+esc(r.unified)+'</td><td>'+esc(r.district)+'</td><td>'+esc(r.birthDate)+'</td><td>'+esc(r.attendanceDate)+'</td><td><button class="clr" onclick="pick(\''+esc(r.id)+'\')">'+(canEdit?"تعديل":"عرض")+'</button>'+(r.photo?' <button class="clr" onclick="openViewer(\''+esc(r.id)+'\')">🖼️ عرض</button>':"")+(canDel?' <button class="del" onclick="delRow(\''+esc(r.id)+'\')">حذف</button>':"")+'</td></tr>').join(""):"<tr><td colspan='11'>لا توجد سجلات.</td></tr>";
 }
 function setConn(on,t){$("dot").className="live"+(on?" on":"");$("conn").textContent=t}
 function enter(uid,u){
@@ -134,5 +161,9 @@ $("lbtn").onclick=doLogin;$("lp").onkeydown=e=>{if(e.key==="Enter")doLogin()};
 $("setupBtn").onclick=()=>{setup=!setup;$("ltitle").textContent=setup?"إنشاء حساب المدير":"تسجيل الدخول";$("lbtn").textContent=setup?"إنشاء الحساب":"دخول";$("setupBtn").textContent=setup?"رجوع لتسجيل الدخول":"أول استخدام؟ أنشئ حساب المدير";$("lmsg").textContent=""};
 $("out").onclick=async()=>{await signOut(auth);location.reload()};
 onAuthStateChanged(auth,async u=>{if(busy||!u)return;try{const s=await getDoc(doc(fs,"users",u.uid));if(!s.exists()){await signOut(auth);return lmsg("حسابك غير مفعّل. اطلب من المدير تفعيله.")}enter(u.uid,s.data())}catch(e){lmsg(err(e))}});
+if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+let dp=null;addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;$("installBtn").classList.remove("hidden")});
+$("installBtn").onclick=async()=>{if(!dp)return;dp.prompt();await dp.userChoice;dp=null;$("installBtn").classList.add("hidden")};
+addEventListener("appinstalled",()=>$("installBtn").classList.add("hidden"));
 render();
 </script></body></html>
