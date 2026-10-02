@@ -29,7 +29,7 @@ async function save(edit){
  if(x&&!ask("dup","⚠ المستفيد «"+x.beneficiary+"» مسجّل مسبقًا (للشهيد/المصاب: "+x.personName+"). إن كان تسجيلًا جديدًا فاضغط مرة أخرى للتأكيد."))return;
  const id=edit?sel:doc(RC).id,b=writeBatch(fs),rec={...d,benKey:bk};
  if(pend.p)rec.photo=pend.p;
- for(const k of["f","b"])if(pend[k]){rec["h"+k]=true;b.set(doc(fs,"images",id+"_"+k),{rid:id,d:pend[k]})}
+ for(const k of["f","b"])if(pend[k]){rec["h"+k]=true;IC.delete(id+"_"+k);b.set(doc(fs,"images",id+"_"+k),{rid:id,d:pend[k]})}
  if(edit){rec.updatedAt=Date.now();b.update(doc(RC,id),rec)}else{rec.createdAt=Date.now();rec.by=me.name;b.set(doc(RC,id),rec)}
  $("addB").disabled=$("edtB").disabled=true;
  try{await b.commit();clear();say(edit?"تم التعديل.":"✓ تمت الإضافة.",1)}finally{$("addB").disabled=$("edtB").disabled=false}}
@@ -40,11 +40,19 @@ async function view(id,k){const r=recs.find(x=>x.id===id);if(!r)return;
 function pick(id){const r=recs.find(x=>x.id===id);if(!r)return;clear();sel=id;F.forEach(k=>$(k).value=r[k]||"");setTile("p",r.photo&&r.photo.startsWith(JP)?r.photo:"");setTile("f","",r.hf);setTile("b","",r.hb);
  $("addB").classList.add("hidden");$("edtB").classList.remove("hidden");$("ft").textContent="تعديل سجل";render();scrollTo({top:0,behavior:"smooth"})}
 async function rm(id){if(!ask("d"+id,"اضغط «حذف» مرة أخرى للتأكيد."))return;const b=writeBatch(fs);b.delete(doc(RC,id));b.delete(doc(fs,"images",id+"_f"));b.delete(doc(fs,"images",id+"_b"));await b.commit();if(sel===id)clear();say("تم الحذف.",1)}
+const ST={"شهيد":"اسم الشهيد","شهيدة":"اسم الشهيدة","مصاب":"اسم المصاب","مصابه":"اسم المصابة"},IC=new Map();
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){io.unobserve(e.target);fill(e.target)}}),{rootMargin:"250px"});
+async function fill(el){const k=el.dataset.id+"_"+el.dataset.k;try{let d=IC.get(k);if(!d){const s=await getDoc(doc(fs,"images",k));d=s.exists()&&s.data().d;if(!d||!d.startsWith(JP))throw 0;if(IC.size>30)IC.delete(IC.keys().next().value);IC.set(k,d)}const sp=el.querySelector("span");if(sp){const i=new Image();i.alt="";i.src=d;sp.replaceWith(i)}}catch{const sp=el.querySelector("span");if(sp)sp.textContent="تعذّر التحميل"}}
 function render(){
  const q=norm(val("q")),f=recs.filter(r=>norm(F.slice(0,6).map(k=>r[k]).join(" ")).includes(q)),M=r=>r.statusType==="شهيد"||r.statusType==="شهيدة";
  $("n0").textContent=recs.length;$("n1").textContent=recs.filter(M).length;$("n2").textContent=recs.filter(r=>!M(r)).length;
- $("list").innerHTML=f.length?f.map(r=>{const i=esc(r.id),ph=r.photo&&r.photo.startsWith(JP),bt=(a,k,t,c)=>`<button class="b ${c||""}" data-a="${a}" data-id="${i}" data-k="${k||""}">${t}</button>`;
- return `<article class="rc ${M(r)?"m":"i"}${r.id===sel?" sel":""}"><button class="im" data-a="v" data-id="${i}" data-k="p">${ph?`<img src="${esc(r.photo)}" alt="">`:"👤"}</button><div><h3>${esc(r.personName)}</h3><div class="s">${esc(r.statusType)} - المستفيد: <b>${esc(r.beneficiary)}</b> (${esc(r.relation)})</div><div class="ch"><span>🪪 ${esc(r.unified)}</span><span>📍 ${esc(r.district)}</span><span>🎂 ${esc(r.birthDate)}</span><span>📅 ${esc(r.attendanceDate)}</span></div></div><div class="ra">${canE?bt("pick","","✎ تعديل"):""}${r.hf?bt("v","f","🪪 الأمامي"):""}${r.hb?bt("v","b","🪪 الخلفي"):""}${canD?bt("rm","","✕ حذف","del"):""}</div></article>`}).join(""):'<div class="st">لا توجد سجلات.</div>'}
+ io.disconnect();
+ $("list").innerHTML=f.length?f.map(r=>{const i=esc(r.id),ph=!!(r.photo&&r.photo.startsWith(JP)),
+ kv=(l,v,n)=>`<div class="kv"><dt>${l}</dt><dd${n?' class="n"':""}>${esc(v)}</dd></div>`,
+ g=(k,t,has,src)=>`<button class="gi${k==="p"?"":" c"}" data-a="v" data-id="${i}" data-k="${k}"${has?"":" disabled"}>${src?`<img src="${esc(src)}" alt="">`:`<span>${has?"جارٍ التحميل…":"لا توجد صورة"}</span>`}<em>${t}</em></button>`,
+ bt=(a,t,c)=>`<button class="b ${c||""}" data-a="${a}" data-id="${i}">${t}</button>`;
+ return `<article class="rc ${M(r)?"m":"i"}${r.id===sel?" sel":""}"><div class="bd">${esc(r.statusType)}</div><dl>${kv(ST[r.statusType]||"الاسم",r.personName)}${kv("اسم المستفيد",r.beneficiary)}${kv("صلة القرابة",r.relation)}${kv("رقم الموحدة",r.unified,1)}${kv("محل النفوس",r.district)}${kv("تاريخ الميلاد",r.birthDate,1)}${kv("تاريخ الحضور",r.attendanceDate,1)}</dl><div class="gal">${g("p","الصورة الشخصية",ph,ph?r.photo:"")}${g("f","الموحدة - الأمامي",r.hf)}${g("b","الموحدة - الخلفي",r.hb)}</div><div class="ra">${canE?bt("pick","✎ تعديل"):""}${canD?bt("rm","✕ حذف","del"):""}</div></article>`}).join(""):'<div class="st">لا توجد سجلات.</div>';
+ $("list").querySelectorAll(".gi.c:not([disabled])").forEach(el=>io.observe(el))}
 function bumpIdle(){clearTimeout(idle);idle=setTimeout(()=>signOut(auth).then(()=>location.reload()),12e5)}
 function enter(uid,u){
  me={id:uid,...u};canE=u.role!=="user";canD=u.role==="admin";
