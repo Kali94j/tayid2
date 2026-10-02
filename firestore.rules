@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{db}/documents {
+  function sig(){return request.auth!=null}
+  function U(){return /databases/$(db)/documents/users/$(request.auth.uid)}
+  function has(){return sig() && exists(U())}
+  function role(){return get(U()).data.role}
+  function canEdit(){return has() && role() in ['editor','admin']}
+  function isAdmin(){return has() && role()=='admin'}
+  function okRec(d){return d.keys().hasOnly(['personName','statusType','beneficiary','relation','unified','district','birthDate','attendanceDate','benKey','photo','hf','hb','by','createdAt','updatedAt'])
+    && d.personName is string && d.personName.size()>0 && d.personName.size()<=120
+    && d.beneficiary is string && d.beneficiary.size()<=120
+    && d.unified is string && d.unified.size()<=30
+    && (!('photo' in d) || (d.photo is string && d.photo.size()<100000 && d.photo.matches('data:image/jpeg;base64,.*')))}
+  function okImg(d){return d.keys().hasOnly(['rid','d']) && d.d is string && d.d.size()<1000000 && d.d.matches('data:image/jpeg;base64,.*')}
+  match /meta/setup { allow read: if true;
+    allow create: if sig() && request.resource.data.by==request.auth.uid && getAfter(/databases/$(db)/documents/users/$(request.auth.uid)).data.role=='admin'; }
+  match /users/{u} {
+    allow read: if has() && (isAdmin() || request.auth.uid==u);
+    allow create: if (isAdmin() && request.auth.uid!=u && request.resource.data.role in ['user','editor','admin'])
+      || (sig() && request.auth.uid==u && request.resource.data.role=='admin' && !exists(/databases/$(db)/documents/meta/setup));
+    allow update: if isAdmin() && request.auth.uid!=u && request.resource.data.role in ['user','editor','admin'];
+    allow delete: if isAdmin() && request.auth.uid!=u;
+  }
+  match /records/{r} {
+    allow read: if has();
+    allow create: if has() && okRec(request.resource.data) && request.resource.data.by==get(U()).data.name;
+    allow update: if canEdit() && okRec(request.resource.data);
+    allow delete: if isAdmin();
+  }
+  match /images/{i} {
+    allow read: if has();
+    allow create: if has() && okImg(request.resource.data);
+    allow update: if canEdit() && okImg(request.resource.data);
+    allow delete: if canEdit();
+  }
+  match /{any=**} { allow read, write: if false; }
+ }
+}

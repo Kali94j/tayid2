@@ -1,284 +1,52 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#315743"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><title>برنامج تأييد الحضور</title>
-<style>
-:root{--pri:#0f766e;--pri2:#14919b;--prit:#0f766e;--navy:#1e3c72;--gold:#c9a24d;--bg:#eef4f5;--card:#fff;--tx:#1c2b33;--mut:#6b7c86;--line:#dbe6ea;--soft:#e8f2f3;--inp:#f6fafb;--red:#c0504d;--sh:0 6px 22px rgba(20,60,80,.08);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1a1f;--card:#15262c;--tx:#e8f1f3;--mut:#93a8b0;--line:#25393f;--soft:#1c3138;--inp:#102127;--prit:#5fd0c8;--sh:0 6px 22px rgba(0,0,0,.35)}}
-:root[data-theme="dark"]{--bg:#0d1a1f;--card:#15262c;--tx:#e8f1f3;--mut:#93a8b0;--line:#25393f;--soft:#1c3138;--inp:#102127;--prit:#5fd0c8;--sh:0 6px 22px rgba(0,0,0,.35)}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box}
-body{margin:0;color:var(--tx);font-family:'Cairo',Tahoma,Arial,sans-serif;background:radial-gradient(900px 420px at 95% -8%,rgba(20,145,155,.18),transparent),radial-gradient(700px 380px at -5% 8%,rgba(30,60,114,.14),transparent),var(--bg);background-attachment:fixed}
-.wrap{max-width:1180px;margin:auto;padding:14px}
-.hd{display:flex;align-items:center;gap:14px;color:#fff;border-radius:24px;padding:20px;background:linear-gradient(135deg,#1e3c72 0%,#2b6b9e 55%,#0f766e 100%);box-shadow:0 12px 30px rgba(30,60,114,.28)}
-.hd-logo{flex:none;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.5)}
-.hd h1{margin:0 0 4px;font-size:21px;font-weight:700}.hd p{margin:0;font-size:12.5px;opacity:.9}
-.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;margin-top:14px;box-shadow:var(--sh)}
-.card>h2{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;color:var(--tx);margin:0 0 14px}
-.card>h2::before{content:"";width:5px;height:20px;border-radius:4px;background:linear-gradient(var(--pri2),var(--navy))}
-.bar{position:sticky;top:8px;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px}
-.user{display:flex;align-items:center;gap:10px}.user b{display:block;font-size:14px}.user small{color:var(--mut);font-size:12px}
-.av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;background:linear-gradient(135deg,#1e3c72,#14919b)}
-.btns{display:flex;gap:8px}
-.form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.sub{grid-column:1/span 4;display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;color:var(--prit);border-bottom:1px dashed var(--line);padding-bottom:6px;margin-top:6px}
-.f2{grid-column:span 2}.full{grid-column:1/span 4}
-label{display:block;font-size:12.5px;font-weight:600;color:var(--mut);margin-bottom:6px}
-input,select{width:100%;height:46px;border:1.5px solid var(--line);border-radius:14px;background:var(--inp);color:var(--tx);padding:6px 14px;font:inherit;font-size:14.5px;transition:border-color .2s,box-shadow .2s}
-input:focus,select:focus{outline:none;border-color:var(--pri2);box-shadow:0 0 0 4px rgba(20,145,155,.16)}
-select{appearance:none;-webkit-appearance:none;padding-left:36px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236b7c86' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 14px center}
-button{border:0;border-radius:12px;padding:11px 18px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:transform .15s,filter .15s}
-button:hover{filter:brightness(1.07)}button:active{transform:scale(.97)}
-.add{background:linear-gradient(135deg,#0f766e,#14919b);color:#fff;box-shadow:0 6px 16px rgba(15,118,110,.3)}
-.edit{background:linear-gradient(135deg,#d9ae45,#c9a24d);color:#3a2d08}
-.del{background:var(--red);color:#fff}
-.clr{background:var(--soft);color:var(--prit)}
-.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.acts .add{flex:1 1 150px}
-.st{min-height:20px;margin-top:10px;font-size:13px;font-weight:700;text-align:center}
-.ph{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.pv{width:64px;height:64px;border:2px dashed var(--line);border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--mut);flex:none;cursor:pointer}.pv img{width:100%;height:100%;object-fit:cover}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-.stat{border-radius:18px;padding:12px 8px;text-align:center;border:1px solid var(--line)}
-.stat b{display:block;font-size:24px;line-height:1.15}.stat span{font-size:12px;color:var(--mut)}
-.s1{background:linear-gradient(135deg,rgba(20,145,155,.16),rgba(20,145,155,.04))}.s1 b{color:var(--prit)}
-.s2{background:linear-gradient(135deg,rgba(201,162,77,.22),rgba(201,162,77,.05))}.s2 b{color:#b08a2e}
-.s3{background:linear-gradient(135deg,rgba(43,107,158,.2),rgba(43,107,158,.05))}.s3 b{color:#2b6b9e}
-.search{display:flex;gap:8px;margin-bottom:16px}.sbox{position:relative;flex:1}
-.sbox svg{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;fill:none;stroke:var(--mut);stroke-width:2;stroke-linecap:round}
-.sbox input{padding-right:42px}
-.tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px}.tw.rl{border:0;overflow:visible}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
-.rc{position:relative;overflow:hidden;display:grid;grid-template-columns:78px 1fr;gap:12px;padding:14px 16px 12px 14px;border-radius:20px;background:var(--card);border:1px solid var(--line);box-shadow:var(--sh);transition:box-shadow .2s,border-color .2s}
-.rc::before{content:"";position:absolute;right:0;top:0;bottom:0;width:5px}
-.rc.m::before{background:linear-gradient(var(--gold),#e8cb82)}.rc.i::before{background:linear-gradient(#2b6b9e,#14919b)}
-.rc.sel{border-color:var(--pri2);box-shadow:0 0 0 3px rgba(20,145,155,.22)}
-.rc-img{width:78px;height:96px;border-radius:16px;overflow:hidden;background:var(--soft);color:var(--mut);display:flex;align-items:center;justify-content:center;cursor:pointer}.rc-img img{width:100%;height:100%;object-fit:cover}
-.rc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.rc h3{margin:0;font-size:15.5px;line-height:1.5}
-.badge{padding:3px 11px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap}
-.badge.m{background:rgba(201,162,77,.2);color:#9a7418}.badge.i{background:rgba(43,107,158,.16);color:#2b6b9e}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .badge.m{color:#e8cb82}:root:not([data-theme="light"]) .badge.i{color:#7fb6e6}}
-.rc-ben{font-size:13px;color:var(--mut);margin-top:2px}.rc-ben b{color:var(--tx)}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.chips span{background:var(--soft);padding:4px 10px;border-radius:10px;font-size:11.5px}
-.rc-act{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:10px}.rc-act button{padding:7px 14px;font-size:12.5px;border-radius:10px}
-.empty{grid-column:1/-1;text-align:center;color:var(--mut);padding:32px 10px}
-table{border-collapse:collapse;width:100%;font-size:13px}
-th{background:var(--soft);color:var(--prit);padding:10px;white-space:nowrap}td{padding:10px;text-align:center;border-top:1px solid var(--line)}
-.live{display:inline-block;width:9px;height:9px;border-radius:50%;background:#e0a93b;margin-left:6px}.live.on{background:#4cd48a;box-shadow:0 0 0 3px rgba(76,212,138,.3)}
-@media(max-width:900px){.form{grid-template-columns:repeat(2,minmax(0,1fr))}.sub,.full{grid-column:1/span 2}}
-@media(max-width:560px){.wrap{padding:10px}.hd{padding:16px;border-radius:20px}.hd h1{font-size:18px}.fm{grid-column:1/span 2}.cards{grid-template-columns:1fr}.stat b{font-size:21px}}
-/* ===== شاشة الدخول ===== */
-#login{--lg-ink:#123b7a;--lg-muted:#4a5a75;--lg-blue:#0a62f0;--lg-page:#a9d3f2;--lg-page2:#a89583;position:fixed;inset:0;z-index:50;display:grid;place-items:center;overflow:hidden;background:linear-gradient(var(--lg-page),var(--lg-page2));font-family:'Tajawal','Cairo',Tahoma,sans-serif}
-@media (prefers-color-scheme:dark){#login{--lg-page:#3b6f9c;--lg-page2:#5d4f43}}
-#login::before{content:'';position:absolute;inset:-30px;background:url(login-bg.jpg) center/cover;filter:blur(20px)}
-#login *{box-sizing:border-box;margin:0}
-#login .lg-stage{position:relative;width:min(100vw,calc(100dvh*2/3));aspect-ratio:2/3;container-type:inline-size;overflow:hidden;background:url(login-bg.jpg) center/100% 100% no-repeat}
-#login button{padding:0;filter:none;font-family:inherit}
-#login .lg-field input{padding:0;border-radius:0;box-shadow:none}
-#login .lg-field input:focus{border:0;box-shadow:none}
-#login .lg-setup{margin-top:3cqw;background:rgba(255,255,255,.5);border:.2cqw solid rgba(255,255,255,.9);border-radius:3cqw;color:var(--lg-ink);font:600 2.4cqw 'Tajawal',sans-serif;padding:1.2cqw 3cqw;cursor:pointer}
-#login .lg-panel{position:absolute;left:16%;top:11.85%;width:68%;height:77%;border-radius:6.5cqw;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(235,246,255,.4));-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:.4cqw solid rgba(255,255,255,.9);box-shadow:0 3cqw 8cqw rgba(20,60,120,.25);display:flex;flex-direction:column;align-items:center;padding-top:3cqw}
-#login .lg-logo{width:20cqw;height:20cqw;border-radius:50%;border:.3cqw solid rgba(255,255,255,.8);padding:1.2cqw;background:rgba(255,255,255,.35)}
-#login .lg-logo div{width:100%;height:100%;border-radius:50%;background:linear-gradient(150deg,#0a3fb0,#0a7fd0 55%,#10c8b6);display:grid;place-items:center}
-#login .lg-logo svg{width:66%;height:66%}
-#login h1{font-size:5.6cqw;font-weight:800;color:var(--lg-ink);margin-top:2cqw;line-height:1.3}
-#login .lg-sub{font-size:2.6cqw;color:var(--lg-muted);margin-top:.8cqw}
-#login .lg-bar{width:10cqw;height:1cqw;border-radius:1cqw;background:linear-gradient(90deg,#10d0c0,#0a4fd6);margin:3cqw 0 4cqw}
-#login .lg-field{width:86.6%;height:9.8cqw;border-radius:2.6cqw;background:rgba(255,255,255,.58);border:.2cqw solid rgba(255,255,255,.95);margin-bottom:3.8cqw;display:flex;direction:ltr;align-items:center;padding:0 3cqw;gap:2.6cqw;box-shadow:0 .6cqw 2cqw rgba(30,80,150,.08)}
-#login .lg-field svg{width:4.4cqw;height:4.4cqw;flex:none;color:#1b3f7c}
-#login .lg-field input{flex:1;min-width:0;height:100%;border:0;background:transparent;outline:0;font:500 2.5cqw 'Tajawal',sans-serif;color:var(--lg-ink);text-align:left}
-#login .lg-field input::placeholder{color:#5a6b86}
-#login .lg-field:focus-within{border-color:#0a62f0;box-shadow:0 0 0 .5cqw rgba(10,98,240,.25)}
-#login .lg-eye{border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:center;color:#1b3f7c}
-#login .lg-eye .off{display:none}
-#login .lg-eye.show .on{display:none}
-#login .lg-eye.show .off{display:block}
-#login .lg-go{width:86.6%;height:9.8cqw;border-radius:2.6cqw;border:.2cqw solid rgba(255,255,255,.7);cursor:pointer;direction:ltr;background:linear-gradient(100deg,#08d6ba,#0a8ae0 45%,#0a42cf);color:#fff;font:700 3.8cqw 'Tajawal',sans-serif;display:flex;align-items:center;justify-content:center;gap:2.6cqw;box-shadow:0 1.4cqw 3cqw rgba(10,80,220,.35)}
-#login .lg-go svg{width:4.6cqw;height:4.6cqw}
-#login .lg-go:active{transform:translateY(.3cqw)}
-#login .lg-rem{width:86.6%;margin-top:4cqw;display:flex;align-items:center;gap:1.8cqw}
-#login .lg-sw{width:7.4cqw;height:4.4cqw;border-radius:4cqw;border:0;background:#aab8cc;position:relative;cursor:pointer;direction:ltr;transition:background .2s}
-#login .lg-sw i{position:absolute;top:.4cqw;left:.4cqw;width:3.6cqw;height:3.6cqw;border-radius:50%;background:#fff;box-shadow:0 .3cqw .8cqw rgba(0,0,0,.25);transition:left .2s}
-#login .lg-sw[aria-checked=true]{background:var(--lg-blue)}
-#login .lg-sw[aria-checked=true] i{left:3.4cqw}
-#login .lg-rem span{font-size:2.7cqw;font-weight:500;color:var(--lg-ink)}
-#login .lg-wave{position:absolute;left:0;bottom:0;width:100%;height:14cqw}
-#login .lg-leaf{position:absolute;left:0;bottom:5cqw;width:12cqw}
-#login .lg-tag{position:absolute;left:0;right:0;bottom:11.4cqw;display:flex;justify-content:center;align-items:center;gap:2.2cqw;font-size:2.6cqw;font-weight:500;color:var(--lg-ink)}
-#login .lg-tag:before,#login .lg-tag:after{content:"";width:5cqw;height:.2cqw;background:#1b3f7c;opacity:.6}
-#login .lg-toast{position:absolute;top:3cqw;left:50%;transform:translateX(-50%);background:rgba(18,59,122,.92);color:#fff;font-size:2.6cqw;padding:1.4cqw 3cqw;border-radius:3cqw;opacity:0;pointer-events:none;transition:opacity .25s;white-space:nowrap}
-#login .lg-toast.on{opacity:1}
-.fb{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;display:inline-block;padding:10px 12px;border-radius:9px;font-size:13px;font-weight:bold;cursor:pointer;margin:0;width:auto;white-space:nowrap}.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0,0,0,0);pointer-events:none}#toast{position:fixed;z-index:99;right:12px;left:12px;top:calc(env(safe-area-inset-top,0px) + 8px);background:#222;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;text-align:center;box-shadow:0 6px 20px #0005}.bad{border-color:#c0574c!important}
-#viewer{position:fixed;inset:0;z-index:100;background:#000;display:flex;flex-direction:column}
-.vbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:#fff;font-size:12px;padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 8px}
-.vbox{flex:1;overflow:auto;display:flex}#vimg{margin:auto;max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in}#vimg.full{max-width:none;max-height:none;object-fit:none;cursor:zoom-out}
-.hidden{display:none!important}
-@media(max-width:900px){.form{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:650px){.form{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:430px){.form{grid-template-columns:1fr}}
-</style></head><body><div id="viewer" class="hidden"><div class="vbar"><button class="del" id="vclose">✕ إغلاق</button><a class="clr fb" id="vdl">⬇ تحميل الأصلية</a><span id="vinfo"></span></div><div class="vbox"><img id="vimg" alt=""></div></div>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self';script-src 'self' https://www.gstatic.com;style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;connect-src https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com;frame-src https://tayid-alhudur.firebaseapp.com;object-src 'none';base-uri 'none';form-action 'none'">
+<meta name="referrer" content="no-referrer"><meta name="theme-color" content="#315743">
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css"><title>برنامج تأييد الحضور</title></head><body>
 <div id="toast" class="hidden"></div>
-<div id="login">
-<div class="lg-stage">
-<main class="lg-panel">
-<div class="lg-logo"><div>
-<svg viewBox="0 0 100 100" aria-hidden="true"><path fill="#fff" d="M16 42c10-13 25-15 36-7 4-4 10-6 16-4-2 5-5 8-9 10 3 9-2 19-13 25l-15 8 4-15c-8-3-15-9-19-17z"/>
-<path d="M30 42c7 7 13 12 20 14" stroke="#0a5cc4" stroke-opacity=".35" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-<path d="M66 40q9-5 15-17" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>
-<g fill="#8af0dc"><ellipse cx="80" cy="22" rx="3.2" ry="6" transform="rotate(-10 80 22)"/><ellipse cx="74" cy="28" rx="3" ry="5.5" transform="rotate(-50 74 28)"/><ellipse cx="85" cy="30" rx="3" ry="5.5" transform="rotate(40 85 30)"/><ellipse cx="70" cy="36" rx="2.8" ry="5" transform="rotate(-60 70 36)"/></g></svg>
-</div></div>
-<h1 id="ltitle">تسجيل الدخول</h1>
-<p class="lg-sub">مرحباً بك في برنامج تأييد الحضور</p>
-<div class="lg-bar"></div>
-<label class="lg-field">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4.2"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg>
-<input id="lu" type="text" dir="auto" placeholder="اسم المستخدم" autocomplete="username" autocapitalize="off">
-</label>
-<label class="lg-field">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.2"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/><circle cx="12" cy="15.5" r="1.1" fill="currentColor"/></svg>
-<input id="lp" type="password" placeholder="كلمة المرور" autocomplete="current-password">
-<button class="lg-eye" id="eye" type="button" aria-label="إظهار كلمة المرور">
-<svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 12s3.8-7 10-7 10 7 10 7-3.8 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>
-<svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 12s3.8-7 10-7 10 7 10 7-3.8 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
-</button>
-</label>
-<button class="lg-go" id="lbtn" type="button"><span id="lbtxt">دخول</span>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button>
-<button class="lg-setup hidden" id="setupBtn" type="button">أول استخدام؟ أنشئ حساب المدير</button>
-<div class="lg-rem"><button class="lg-sw" id="sw" type="button" role="switch" aria-checked="true" aria-label="تذكرني"><i></i></button><span>تذكرني</span></div>
-<svg class="lg-leaf" viewBox="0 0 120 120" aria-hidden="true"><g fill="#17b8a6"><path d="M60 8c22 8 28 30 14 44-20-4-24-30-14-44z"/><path d="M20 40c24-4 40 12 34 30-24 4-40-10-34-30z"/><path d="M10 80c18-6 32 4 32 20-18 8-34-2-32-20z" fill="#2fd0a8"/></g><path d="M8 118C30 80 50 50 78 14" stroke="#0e9c92" stroke-width="3" fill="none"/></svg>
-<div class="lg-tag">معاً من أجل مستقبل أفضل</div>
-<svg class="lg-wave" viewBox="0 0 696 140" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="w1" x1="0" x2="1"><stop offset="0" stop-color="#0a8fe8"/><stop offset="1" stop-color="#15d1b4"/></linearGradient></defs>
-<path d="M0 70C140 30 260 100 400 70S600 0 696 30V140H0Z" fill="#2ed8c0" opacity=".9"/><path d="M0 100C150 60 300 120 450 90S620 70 696 85V140H0Z" fill="url(#w1)"/><path d="M0 125C200 100 420 140 696 110V140H0Z" fill="#0a7fe0" opacity=".85"/></svg>
-</main>
-<div class="lg-toast" id="lmsg"></div>
-</div>
-</div>
+<div id="viewer" class="hidden"><div class="vb"><button class="b del" data-a="vx">✕ إغلاق</button><a class="b" id="vdl" style="text-decoration:none">⬇ تحميل</a><span id="vi"></span></div><img id="vimg" alt=""></div>
+
+<div id="login"><i class="o o1"></i><i class="o o2"></i><i class="o o3"></i>
+<main class="gl"><div class="lg"><svg width="40" height="40" viewBox="0 0 100 100"><path fill="#fff" d="M16 42c10-13 25-15 36-7 4-4 10-6 16-4-2 5-5 8-9 10 3 9-2 19-13 25l-15 8 4-15c-8-3-15-9-19-17z"/><path d="M66 40q9-5 15-17" stroke="#fff" stroke-width="2.5" fill="none"/><g fill="#8af0dc"><ellipse cx="80" cy="22" rx="3.2" ry="6"/><ellipse cx="74" cy="29" rx="3" ry="5.5"/><ellipse cx="85" cy="30" rx="3" ry="5.5"/></g></svg></div>
+<h1 id="lt">تسجيل الدخول</h1><p>برنامج تأييد الحضور</p>
+<label class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg><input id="lu" type="text" placeholder="اسم المستخدم" autocomplete="username" autocapitalize="off"></label>
+<label class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.2"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/></svg><input id="lp" type="password" placeholder="كلمة المرور" autocomplete="current-password"><button type="button" data-a="eye" aria-label="إظهار">👁</button></label>
+<button class="go" id="lb">دخول</button><div class="lm" id="lm"></div>
+<label class="rm"><input type="checkbox" id="rem" checked> تذكرني على هذا الجهاز</label>
+<button class="lnk hidden" id="sb" data-a="setup">أول استخدام؟ أنشئ حساب المدير</button>
+<div class="lk">🔒 اتصال مشفّر · تنتهي الجلسة تلقائيًا بعد 20 دقيقة خمول</div></main></div>
+
 <div class="wrap hidden" id="app">
-<header class="hd"><div class="hd-logo"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg></div><div><h1>برنامج تأييد الحضور</h1><p><span id="dot" class="live"></span><span id="conn">جارٍ الاتصال…</span> · أي إضافة تظهر فورًا على جميع الأجهزة</p></div></header>
-<div class="card bar"><div class="user"><div class="av" id="av">؟</div><div><b id="me"></b><small id="role"></small></div></div><div class="btns"><button class="clr hidden" id="installBtn">📲 تثبيت</button><button class="clr" id="out">⎋ خروج</button></div></div>
-<div class="card" id="formCard"><h2>إضافة / تعديل سجل</h2><div class="form">
-<div class="sub">👤 بيانات الشهيد أو المصاب</div>
-<div class="f2"><label>اسم الشهيد أو المصاب</label><input id="personName"></div>
-<div class="f2"><label>الحالة</label><select id="statusType"><option value="">اختر</option><option>شهيد</option><option>شهيدة</option><option>مصاب</option><option>مصابه</option></select></div>
-<div class="sub">🤝 بيانات المستفيد</div>
-<div class="f2"><label>اسم المستفيد</label><input id="beneficiary"></div>
-<div><label>صلة القرابة</label><select id="relation"><option value="">اختر</option><option>الاب</option><option>الام</option><option>الزوجه</option><option>الزوجه متزوجه</option><option>الابن</option><option>البنت</option><option>الاخ</option><option>الاخت</option><option>مصاب</option><option>مصابه</option></select></div>
-<div><label>رقم الموحدة</label><input id="unified" inputmode="numeric"></div>
-<div class="fm"><label>محل النفوس</label><select id="district"><option value="">اختر</option><option>البصرة</option><option>المعقل</option><option>الهارثة</option><option>شط العرب</option><option>النشوه</option><option>القرنة</option><option>الدير</option><option>الثغر</option><option>ابي الخصيب</option><option>المدينه</option><option>طلحه</option><option>العز</option><option>الزبير</option><option>سفوان</option><option>ام قصر</option><option>الفاو</option><option>السيبه</option></select></div>
-<div class="sub">📅 التواريخ</div>
-<div><label>تاريخ الميلاد</label><input id="birthDate" type="date"></div>
-<div><label>تاريخ الحضور</label><input id="attendanceDate" type="date"></div>
-<div class="sub">🖼️ الصورة الشخصية (اختيارية)</div>
-<div class="full"><div class="ph"><label class="clr fb" for="photoInput">🖼️ المعرض</label><label class="clr fb" for="camInput">📷 كاميرا</label><input id="photoInput" class="vh" type="file" accept="image/*"><input id="camInput" class="vh" type="file" accept="image/*" capture="environment"><div id="pv" class="pv">صورة</div></div></div>
+<header class="hd"><div><h1>برنامج تأييد الحضور</h1><small><span id="dot" class="dot"></span><span id="conn">جارٍ الاتصال…</span></small></div></header>
+<div class="cd bar"><div><span class="av" id="av">؟</span><b id="me"></b> <small id="role"></small></div><div><button class="b hidden" id="ib" data-a="inst">📲 تثبيت</button> <button class="b" data-a="out">⎋ خروج</button></div></div>
+
+<section class="cd"><h2 id="ft">إضافة سجل جديد</h2>
+<div class="sec">👤 بيانات الشهيد أو المصاب</div><div class="gr">
+<div><label for="personName">الاسم الكامل</label><input type="text" id="personName" maxlength="120"></div>
+<div><label for="statusType">الحالة</label><select id="statusType"><option value="">اختر</option><option>شهيد</option><option>شهيدة</option><option>مصاب</option><option>مصابه</option></select></div></div>
+<div class="sec">🤝 بيانات المستفيد</div><div class="gr">
+<div class="fw"><label for="beneficiary">اسم المستفيد</label><input type="text" id="beneficiary" maxlength="120"></div>
+<div><label for="relation">صلة القرابة</label><select id="relation"><option value="">اختر</option><option>الاب</option><option>الام</option><option>الزوجه</option><option>الزوجه متزوجه</option><option>الابن</option><option>البنت</option><option>الاخ</option><option>الاخت</option><option>مصاب</option><option>مصابه</option></select></div>
+<div><label for="unified">رقم الموحدة</label><input type="text" id="unified" inputmode="numeric" maxlength="30"></div>
+<div class="fw"><label for="district">محل النفوس</label><select id="district"><option value="">اختر</option><option>البصرة</option><option>المعقل</option><option>الهارثة</option><option>شط العرب</option><option>النشوه</option><option>القرنة</option><option>الدير</option><option>الثغر</option><option>ابي الخصيب</option><option>المدينه</option><option>طلحه</option><option>العز</option><option>الزبير</option><option>سفوان</option><option>ام قصر</option><option>الفاو</option><option>السيبه</option></select></div></div>
+<div class="sec">📅 التواريخ</div><div class="gr">
+<div><label for="birthDate">تاريخ الميلاد</label><input type="date" id="birthDate"></div>
+<div><label for="attendanceDate">تاريخ الحضور</label><input type="date" id="attendanceDate"></div></div>
+<div class="sec">🪪 الصور (اختيارية)</div><div class="tl">
+<div class="tile" id="t_p" data-k="p">👤 الصورة الشخصية<input type="file" accept="image/*" data-k="p"></div>
+<div class="tile" id="t_f" data-k="f">🪪 الموحدة: الوجه الأمامي<input type="file" accept="image/*" data-k="f"></div>
+<div class="tile" id="t_b" data-k="b">🪪 الموحدة: الوجه الخلفي<input type="file" accept="image/*" data-k="b"></div></div>
+<div class="ac"><button class="b add" id="addB" data-a="add">＋ إضافة</button><button class="b edt hidden" id="edtB" data-a="edt">✎ حفظ التعديل</button><button class="b" data-a="clr">↺ تفريغ</button></div><div id="st" class="st"></div></section>
+
+<section class="cd"><h2>السجلات</h2><div class="stats"><div><b id="n0">0</b>الإجمالي</div><div><b id="n1">0</b>الشهداء</div><div><b id="n2">0</b>المصابون</div></div>
+<input type="search" id="q" placeholder="ابحث بالاسم أو المستفيد أو الموحدة…"><div id="list" class="cards"></div></section>
+
+<section class="cd hidden" id="adm"><h2>إدارة المستخدمين</h2><div class="gr">
+<div><label for="nu">اسم مستخدم جديد</label><input type="text" id="nu" autocomplete="off"></div>
+<div><label for="np">كلمة السر (8 أحرف على الأقل)</label><input type="password" id="np" autocomplete="new-password"></div>
+<div><label for="nr">الصلاحية</label><select id="nr"><option value="user">مستخدم (إضافة)</option><option value="editor">محرر (+تعديل)</option><option value="admin">مدير (+حذف وإدارة)</option></select></div>
+<div style="align-self:end"><button class="b add" data-a="nu" style="width:100%">＋ إضافة مستخدم</button></div></div>
+<div id="ust" class="st"></div><table><thead><tr><th>المستخدم</th><th>الصلاحية</th><th></th></tr></thead><tbody id="ub"></tbody></table></section>
 </div>
-<div class="acts"><button class="add" id="addBtn">＋ إضافة</button><button class="edit hidden" id="editBtn">✎ تعديل</button><button class="del hidden" id="delBtn">✕ حذف</button><button class="clr" id="clrBtn">↺ تفريغ</button><button class="clr hidden" id="viewBtn">🖼️ عرض الصورة</button></div><div id="status" class="st"></div></div>
-<div class="card"><h2>السجلات</h2>
-<div class="stats"><div class="stat s1"><b id="total">0</b><span>الإجمالي</span></div><div class="stat s2"><b id="martyrs">0</b><span>الشهداء</span></div><div class="stat s3"><b id="injured">0</b><span>المصابون</span></div></div>
-<div class="search"><div class="sbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="search" placeholder="ابحث بالاسم أو المستفيد أو الموحدة أو النفوس…"></div><button class="clr" id="clrSearch">مسح</button></div>
-<div class="tw rl"><div id="tbody" class="cards"></div></div></div>
-<div class="card hidden" id="adminCard"><h2>إدارة المستخدمين</h2><div class="form"><div><label>اسم مستخدم جديد</label><input id="nu"></div><div><label>كلمة السر</label><input id="np" type="text"></div><div><label>الصلاحية</label><select id="nr"><option value="user">مستخدم (إضافة)</option><option value="editor">محرر (+تعديل)</option><option value="admin">مدير (+حذف وإدارة)</option></select></div><div style="display:flex;align-items:end"><button class="add" id="nbtn">＋ إضافة مستخدم</button></div></div><div id="ust" class="st"></div><div class="tw" style="margin-top:8px"><table style="min-width:420px"><thead><tr><th>المستخدم</th><th>الصلاحية</th><th></th></tr></thead><tbody id="ubody"></tbody></table></div></div>
-</div>
-<script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import {getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,onAuthStateChanged,deleteUser,setPersistence,browserLocalPersistence,browserSessionPersistence} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import {getFirestore,collection,doc,getDoc,getDocs,setDoc,addDoc,updateDoc,deleteDoc,query,where,orderBy,onSnapshot,writeBatch} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-const cfg={apiKey:"AIzaSyAQ-odIjvYhIdqwAB7-L3ncuj0_xLCjFNk",authDomain:"tayid-alhudur.firebaseapp.com",projectId:"tayid-alhudur",storageBucket:"tayid-alhudur.firebasestorage.app",messagingSenderId:"171273581864",appId:"1:171273581864:web:62a107b4b7070687ddcc1d"};
-const app=initializeApp(cfg),auth=getAuth(app),fs=getFirestore(app),auth2=getAuth(initializeApp(cfg,"sec"));
-const $=id=>document.getElementById(id),val=id=>$(id).value.trim();
-const F=["personName","statusType","beneficiary","relation","unified","district","birthDate","attendanceDate"];
-const LB={personName:"اسم الشهيد أو المصاب",statusType:"الحالة",beneficiary:"اسم المستفيد",relation:"صلة القرابة",unified:"رقم الموحدة",district:"محل النفوس",birthDate:"تاريخ الميلاد",attendanceDate:"تاريخ الحضور"};
-const RN={user:"مستخدم",editor:"محرر",admin:"مدير"};
-let records=[],selId=null,photo="",photoFile=null,cur=null,upBusy=false,canEdit=false,canDel=false,me=null,started=false,busy=false,setup=false,tt,armed={};
-const RC=collection(fs,"records");
-function say(t,ok){$("status").textContent=t;$("status").style.color=ok?"#3e8a55":"#c0574c";const o=$("toast");o.textContent=t;o.style.background=ok?"#2f7a4a":"#a64e45";o.classList.remove("hidden");clearTimeout(tt);tt=setTimeout(()=>o.classList.add("hidden"),4500)}
-const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const err=e=>({"auth/invalid-credential":"اسم المستخدم أو كلمة السر غير صحيحة.","auth/user-not-found":"اسم المستخدم أو كلمة السر غير صحيحة.","auth/wrong-password":"اسم المستخدم أو كلمة السر غير صحيحة.","auth/weak-password":"كلمة السر 6 أحرف على الأقل.","auth/email-already-in-use":"هذا الاسم مستخدم مسبقًا.","auth/network-request-failed":"لا يوجد اتصال بالإنترنت.","auth/too-many-requests":"محاولات كثيرة، حاول لاحقًا.","permission-denied":"ليس لديك صلاحية لهذه العملية."}[e.code]||e.message||"حدث خطأ");
-let lt;const lmsg=t=>{const x=$("lmsg");x.textContent=t;x.classList.add("on");clearTimeout(lt);lt=setTimeout(()=>x.classList.remove("on"),3800)};
-const remOn=()=>$("sw").getAttribute("aria-checked")==="true";
-async function mail(n){const h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(n.trim().toLowerCase()));return [...new Uint8Array(h)].slice(0,16).map(b=>b.toString(16).padStart(2,"0")).join("")+"@tayid.app"}
-const norm=s=>String(s||"").replace(/[\u064B-\u065F\u0640]/g,"").replace(/[أإآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/\s+/g," ").trim().toLowerCase();
-function ask(k,m){if(armed[k]&&Date.now()-armed[k]<5000){delete armed[k];return true}armed[k]=Date.now();say(m);return false}
-function shrink(file){return new Promise((res,rej)=>{const r=new FileReader();r.onerror=rej;r.onload=()=>{const i=new Image();i.onerror=rej;i.onload=()=>{const k=Math.min(1,360/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.8))};i.src=r.result};r.readAsDataURL(file)})}
-["photoInput","camInput"].forEach(i=>$(i).onchange=async e=>{const f=e.target.files[0];if(!f)return;if(f.size>15*1048576)return say("حجم الصورة "+(f.size/1048576).toFixed(1)+" ميغابايت، والحد الأقصى 15.");photoFile=f;try{photo=await shrink(f)}catch(_){photo=""}showPhoto();syncView();say("تم اختيار الصورة بجودتها الأصلية ("+(f.size/1048576).toFixed(1)+" MB).",true)});
-function showPhoto(){$("pv").innerHTML=photo?'<img src="'+photo+'">':"صورة"}
-function data(){const d={};F.forEach(k=>d[k]=val(k));return d}
-function ok(d){F.forEach(k=>$(k).classList.remove("bad"));const m=F.filter(k=>!d[k]);if(m.length){m.forEach(k=>$(k).classList.add("bad"));say("أكمل الحقول: "+m.map(k=>LB[k]).join("، "));$(m[0]).scrollIntoView({block:"center",behavior:"smooth"});return false}return true}
-function clearForm(){F.forEach(k=>$(k).value="");$("photoInput").value="";$("camInput").value="";photo="";photoFile=null;cur=null;selId=null;showPhoto();syncView();render()}
-async function guard(fn){try{await fn()}catch(e){say(err(e))}}
-function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
-const srt=s=>s.split(" ").sort().join(" ");
-function dup(name,except){const n=norm(name);let sim=null;for(const r of records){if(r.id===except)continue;const o=norm(r.beneficiary);if(o===n||srt(o)===srt(n))return{r,exact:true};const t=Math.max(2,Math.round(Math.min(o.length,n.length)*.15));if(lev(o,n)<=t||lev(srt(o),srt(n))<=t)sim=sim||{r,exact:false}}return sim}
-function dupMsg(d,x,key){$("beneficiary").classList.add("bad");const t=" «"+x.r.beneficiary+"» (للشهيد/المصاب: "+x.r.personName+")";if(x.exact){say("⛔ اسم المستفيد «"+d.beneficiary+"» مسجّل مسبقًا"+t+". لا يمكن تكراره.");return true}return !ask(key,"⚠ يوجد اسم مشابه جدًا:"+t+". إن كان شخصًا مختلفًا فاضغط الحفظ مرة أخرى للتأكيد.")}
-const CH=700000,rid8=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
-function syncView(){$("viewBtn").classList.toggle("hidden",!(photoFile||photo||(cur&&cur.photoId)))}
-async function uploadPhoto(file,pid,onp){const url=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});const b=url.slice(url.indexOf(",")+1),n=Math.ceil(b.length/CH);
- try{for(let i=0;i<n;i+=3){const bt=writeBatch(fs);for(let j=i;j<Math.min(n,i+3);j++)bt.set(doc(fs,"photoChunks",pid+"_"+j),{pid,i:j,d:b.slice(j*CH,(j+1)*CH)});await bt.commit();onp(Math.min(n,i+3),n)}}catch(e){delChunks(pid,n);throw e}return n}
-const delChunks=(pid,n)=>Promise.all(Array.from({length:n},(_,i)=>deleteDoc(doc(fs,"photoChunks",pid+"_"+i)).catch(()=>{})));
-const imgCache={};
-async function loadOriginal(r){if(imgCache[r.photoId])return imgCache[r.photoId];const s=await getDocs(query(collection(fs,"photoChunks"),where("pid","==",r.photoId)));const b=s.docs.map(d=>d.data()).sort((x,y)=>x.i-y.i).map(x=>x.d).join("");if(s.size<(r.photoN||1))throw new Error("الصورة الأصلية غير مكتملة.");const blob=await (await fetch("data:"+(r.photoType||"image/jpeg")+";base64,"+b)).blob();return imgCache[r.photoId]=URL.createObjectURL(blob)}
-function showV(src,info,dl,name){$("vimg").src=src;$("vimg").classList.remove("full");$("vinfo").textContent=info;if(dl){$("vdl").href=dl;$("vdl").download=name||"photo.jpg";$("vdl").classList.remove("hidden")}else $("vdl").classList.add("hidden");$("viewer").classList.remove("hidden")}
-window.openViewer=async id=>{const r=records.find(x=>x.id===id);if(!r)return;const ext=(r.photoType||"image/jpeg").split("/")[1]||"jpg";
- if(!r.photoId){if(r.photo)showV(r.photo,"نسخة مصغّرة فقط (سجل قديم). لتحسينها: تعديل ثم اختر الصورة الأصلية.");return}
- showV(r.photo||"","جارٍ تحميل الصورة الأصلية…");try{const u=await loadOriginal(r);showV(u,"الأصلية "+(r.photoSize/1048576).toFixed(1)+" MB — اضغط الصورة للتكبير",u,(r.personName||"photo")+"."+ext)}catch(e){$("vinfo").textContent=err(e)}};
-function openCurrent(){if(photoFile){const u=URL.createObjectURL(photoFile);showV(u,"الصورة الأصلية (لم تُحفظ بعد)",u,photoFile.name)}else if(cur&&cur.photoId)openViewer(cur.id);else if(photo)showV(photo,"نسخة مصغّرة فقط")}
-$("viewBtn").onclick=openCurrent;$("pv").onclick=openCurrent;$("vclose").onclick=()=>$("viewer").classList.add("hidden");$("vimg").onclick=e=>e.target.classList.toggle("full");
-async function withUp(fn){if(upBusy)return say("انتظر انتهاء الرفع.");upBusy=true;try{await fn()}finally{upBusy=false}}
-$("addBtn").onclick=()=>guard(()=>withUp(async()=>{const d=data();if(!ok(d))return;const x=dup(d.beneficiary);if(x&&dupMsg(d,x,"dupadd"))return;
- const rec={...d,benKey:norm(d.beneficiary),photo,createdAt:Date.now(),by:me.name};
- if(photoFile){const pid=rid8();rec.photoId=pid;rec.photoN=await uploadPhoto(photoFile,pid,(a,b)=>say("رفع الصورة بجودتها الأصلية "+a+"/"+b+"…",true));rec.photoType=photoFile.type||"image/jpeg";rec.photoSize=photoFile.size}
- await addDoc(RC,rec);clearForm();say("✓ تمت الإضافة.",true);setTimeout(()=>document.querySelector(".tw").scrollIntoView({behavior:"smooth"}),300)}));
-$("editBtn").onclick=()=>guard(()=>withUp(async()=>{if(!selId)return say("اختر سجلًا من الجدول أولًا.");const d=data();if(!ok(d))return;const x=dup(d.beneficiary,selId);if(x&&dupMsg(d,x,"dupedit"+selId))return;
- const upd={...d,benKey:norm(d.beneficiary),updatedAt:Date.now()};let old=null;
- if(photoFile){const pid=rid8();upd.photoId=pid;upd.photoN=await uploadPhoto(photoFile,pid,(a,b)=>say("رفع الصورة بجودتها الأصلية "+a+"/"+b+"…",true));upd.photoType=photoFile.type||"image/jpeg";upd.photoSize=photoFile.size;upd.photo=photo;if(cur&&cur.photoId)old={pid:cur.photoId,n:cur.photoN}}
- await updateDoc(doc(fs,"records",selId),upd);if(old)delChunks(old.pid,old.n);clearForm();say("تم التعديل.",true)}));
-const rmRec=async id=>{const r=records.find(x=>x.id===id);await deleteDoc(doc(fs,"records",id));if(r&&r.photoId)delChunks(r.photoId,r.photoN||0)};
-$("delBtn").onclick=()=>guard(async()=>{if(!selId)return say("اختر سجلًا من الجدول أولًا، أو استخدم زر «حذف» داخل الجدول.");if(!ask("d"+selId,"اضغط «حذف» مرة أخرى للتأكيد."))return;await rmRec(selId);clearForm();say("تم الحذف.",true)});
-window.delRow=id=>guard(async()=>{if(!ask("d"+id,"اضغط «حذف» مرة أخرى للتأكيد."))return;await rmRec(id);if(selId===id)clearForm();say("تم الحذف.",true)});
-$("clrBtn").onclick=clearForm;$("clrSearch").onclick=()=>{$("search").value="";render()};$("search").oninput=render;
-window.pick=id=>{const r=records.find(x=>x.id===id);if(!r)return;selId=id;cur=r;photoFile=null;F.forEach(k=>$(k).value=r[k]||"");photo=r.photo||"";showPhoto();syncView();render();scrollTo({top:0,behavior:"smooth"})};
-function render(){
- const q=val("search").toLowerCase(),f=records.filter(r=>["personName","statusType","beneficiary","relation","unified","district"].some(k=>String(r[k]||"").toLowerCase().includes(q)));
- $("total").textContent=records.length;
- $("martyrs").textContent=records.filter(r=>["شهيد","شهيدة"].includes(r.statusType)).length;
- $("injured").textContent=records.filter(r=>["مصاب","مصابه"].includes(r.statusType)).length;
- const U='<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>';
- $("tbody").innerHTML=f.length?f.map(r=>{const m=["شهيد","شهيدة"].includes(r.statusType),i=esc(r.id);
-  return '<article class="rc '+(m?"m":"i")+(r.id===selId?" sel":"")+'"><div class="rc-img" onclick="openViewer(\''+i+'\')">'+(r.photo?'<img src="'+r.photo+'" alt="">':U)+'</div><div><div class="rc-top"><h3>'+esc(r.personName)+'</h3><span class="badge '+(m?"m":"i")+'">'+esc(r.statusType)+'</span></div><div class="rc-ben">المستفيد: <b>'+esc(r.beneficiary)+'</b> ('+esc(r.relation)+')</div><div class="chips"><span>🪪 '+esc(r.unified)+'</span><span>📍 '+esc(r.district)+'</span><span>🎂 '+esc(r.birthDate)+'</span><span>📅 '+esc(r.attendanceDate)+'</span></div></div><div class="rc-act"><button class="clr" onclick="pick(\''+i+'\')">'+(canEdit?"✎ تعديل":"👁 عرض")+'</button>'+(r.photo?'<button class="clr" onclick="openViewer(\''+i+'\')">🖼️ الصورة</button>':"")+(canDel?'<button class="del" onclick="delRow(\''+i+'\')">✕ حذف</button>':"")+'</div></article>'}).join(""):'<div class="empty">لا توجد سجلات.</div>';
-}
-function setConn(on,t){$("dot").className="live"+(on?" on":"");$("conn").textContent=t}
-function enter(uid,u){
- me={id:uid,...u};canEdit=u.role!=="user";canDel=u.role==="admin";
- $("login").classList.add("hidden");$("app").classList.remove("hidden");
- $("me").textContent=u.name;$("av").textContent=(u.name||"؟").trim().charAt(0).toUpperCase();$("role").textContent=RN[u.role]||"مستخدم";
- $("editBtn").classList.toggle("hidden",!canEdit);$("delBtn").classList.toggle("hidden",!canDel);render();
- if(started)return;started=true;setConn(true,"متصل ومتزامن");
- onSnapshot(query(RC,orderBy("createdAt","desc")),s=>{records=s.docs.map(d=>({id:d.id,...d.data()}));render()},e=>setConn(false,"انقطع الاتصال: "+err(e)));
- if(u.role==="admin"){$("adminCard").classList.remove("hidden");onSnapshot(collection(fs,"users"),s=>{$("ubody").innerHTML=s.docs.map(d=>{const x=d.data(),self=d.id===uid;return '<tr><td>'+esc(x.name)+'</td><td><select onchange="setRole(\''+d.id+'\',this.value)" '+(self?"disabled":"")+'>'+Object.keys(RN).map(r=>'<option value="'+r+'"'+(x.role===r?" selected":"")+'>'+RN[r]+'</option>').join("")+'</select></td><td>'+(self?"":'<button class="del" onclick="delUser(\''+d.id+'\')">حذف</button>')+'</td></tr>'}).join("")})}
-}
-window.setRole=(id,r)=>updateDoc(doc(fs,"users",id),{role:r}).catch(e=>say(err(e)));
-window.delUser=id=>{if(ask("u"+id,"اضغط «حذف» مرة أخرى لحذف المستخدم."))deleteDoc(doc(fs,"users",id)).catch(e=>say(err(e)))};
-$("nbtn").onclick=async()=>{const n=val("nu"),p=$("np").value,st=$("ust");st.style.color="#c0574c";if(!n||p.length<6)return st.textContent="أدخل الاسم وكلمة سر من 6 أحرف على الأقل.";
- try{const c=await createUserWithEmailAndPassword(auth2,await mail(n),p);await setDoc(doc(fs,"users",c.user.uid),{name:n,role:$("nr").value,createdAt:Date.now()});await signOut(auth2);$("nu").value="";$("np").value="";st.style.color="#3e8a55";st.textContent="تمت إضافة المستخدم."}catch(e){st.textContent=err(e)}};
-async function doLogin(){
- const n=val("lu"),p=$("lp").value;if(!n||!p)return lmsg("أدخل اسم المستخدم وكلمة السر.");
- $("lbtn").disabled=true;
- try{await setPersistence(auth,remOn()?browserLocalPersistence:browserSessionPersistence);const em=await mail(n);
-  if(setup){if(p.length<6)return lmsg("كلمة السر 6 أحرف على الأقل.");busy=true;const c=await createUserWithEmailAndPassword(auth,em,p);
-   try{const u={name:n,role:"admin",createdAt:Date.now()},b=writeBatch(fs);b.set(doc(fs,"users",c.user.uid),u);b.set(doc(fs,"meta","setup"),{by:c.user.uid,at:Date.now()});await b.commit();busy=false;enter(c.user.uid,u)}
-   catch(e){await deleteUser(c.user).catch(()=>{});busy=false;lmsg("تم إعداد المدير مسبقًا. اطلب حسابًا من المدير.");setup=false;$("setupBtn").classList.add("hidden");$("ltitle").textContent="تسجيل الدخول";$("lbtxt").textContent="دخول"}}
-  else{await signInWithEmailAndPassword(auth,em,p);try{remOn()?localStorage.setItem("tayid_user",n):localStorage.removeItem("tayid_user")}catch(_){}}}
- catch(e){busy=false;lmsg(err(e))}finally{$("lbtn").disabled=false}
-}
-$("eye").onclick=function(){const p=$("lp"),h=p.type==="password";p.type=h?"text":"password";this.classList.toggle("show",h)};
-$("sw").onclick=function(){this.setAttribute("aria-checked",this.getAttribute("aria-checked")!=="true")};
-try{const sv=localStorage.getItem("tayid_user");if(sv)$("lu").value=sv}catch(_){}
-$("lbtn").onclick=doLogin;$("lu").onkeydown=e=>{if(e.key==="Enter")$("lp").focus()};$("lp").onkeydown=e=>{if(e.key==="Enter")doLogin()};
-$("setupBtn").onclick=()=>{setup=!setup;$("ltitle").textContent=setup?"إنشاء حساب المدير":"تسجيل الدخول";$("lbtxt").textContent=setup?"إنشاء الحساب":"دخول";$("setupBtn").textContent=setup?"رجوع لتسجيل الدخول":"أول استخدام؟ أنشئ حساب المدير";$("lmsg").textContent=""};
-$("out").onclick=async()=>{await signOut(auth);location.reload()};
-onAuthStateChanged(auth,async u=>{if(busy||!u)return;try{const s=await getDoc(doc(fs,"users",u.uid));if(!s.exists()){await signOut(auth);return lmsg("حسابك غير مفعّل. اطلب من المدير تفعيله.")}enter(u.uid,s.data())}catch(e){lmsg(err(e))}});
-if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
-let dp=null;addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;$("installBtn").classList.remove("hidden")});
-$("installBtn").onclick=async()=>{if(!dp)return;dp.prompt();await dp.userChoice;dp=null;$("installBtn").classList.add("hidden")};
-addEventListener("appinstalled",()=>$("installBtn").classList.add("hidden"));
-getDoc(doc(fs,"meta","setup")).then(x=>{if(!x.exists())$("setupBtn").classList.remove("hidden")}).catch(()=>{});
-render();
-</script></body></html>
+<script type="module" src="app.js"></script></body></html>
