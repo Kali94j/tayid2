@@ -7,11 +7,18 @@ service cloud.firestore {
   function role(){return get(U()).data.role}
   function canEdit(){return has() && role() in ['editor','admin']}
   function isAdmin(){return has() && role()=='admin'}
-  function okRec(d){return d.keys().hasOnly(['personName','statusType','beneficiary','relation','unified','district','birthDate','attendanceDate','benKey','photo','hf','hb','by','createdAt','updatedAt'])
+  function s(d,k,n){return !(k in d) || (d[k] is string && d[k].size()<=n)}
+  function okPh(d){return !('photo' in d) || (d.photo is string && d.photo.size()<100000 && d.photo.matches('data:image/jpeg;base64,.*'))}
+  function okRec(d){return d.keys().hasOnly(['personName','statusType','beneficiary','relation','unified','district','birthDate','attendanceDate','benKey','photo','hf','hb','by','createdAt','updatedAt','pct','bc','sk'])
     && d.personName is string && d.personName.size()>0 && d.personName.size()<=120
-    && d.beneficiary is string && d.beneficiary.size()<=120
-    && d.unified is string && d.unified.size()<=30
-    && (!('photo' in d) || (d.photo is string && d.photo.size()<100000 && d.photo.matches('data:image/jpeg;base64,.*')))}
+    && d.statusType in ['شهيد','شهيدة','مصاب','مصابه']
+    && s(d,'beneficiary',120) && s(d,'relation',40) && s(d,'unified',30) && s(d,'district',40) && s(d,'birthDate',12) && s(d,'attendanceDate',12) && s(d,'benKey',140) && okPh(d)
+    && (!('pct' in d) || (d.pct is int && d.pct>=30 && d.pct<=100))
+    && (!('bc' in d) || (d.bc is int && d.bc>=0))
+    && (!('sk' in d) || (d.sk is list && d.sk.size()<=400))}
+  function okBen(d){return d.keys().hasOnly(['rid','beneficiary','relation','unified','district','birthDate','attendanceDate','benKey','photo','hf','hb','by','createdAt','updatedAt'])
+    && d.rid is string && d.beneficiary is string && d.beneficiary.size()>0 && d.beneficiary.size()<=120
+    && s(d,'relation',40) && s(d,'unified',30) && s(d,'district',40) && s(d,'birthDate',12) && s(d,'attendanceDate',12) && s(d,'benKey',140) && okPh(d)}
   function okImg(d){return d.keys().hasOnly(['rid','d']) && d.d is string && d.d.size()<1000000 && d.d.matches('data:image/jpeg;base64,.*')}
   match /meta/setup { allow read: if true;
     allow create: if sig() && request.resource.data.by==request.auth.uid && getAfter(/databases/$(db)/documents/users/$(request.auth.uid)).data.role=='admin'; }
@@ -25,7 +32,14 @@ service cloud.firestore {
   match /records/{r} {
     allow read: if has();
     allow create: if has() && okRec(request.resource.data) && request.resource.data.by==get(U()).data.name;
-    allow update: if canEdit() && okRec(request.resource.data);
+    allow update: if (canEdit() && okRec(request.resource.data))
+      || (has() && okRec(request.resource.data) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bc','sk']));
+    allow delete: if isAdmin();
+  }
+  match /bens/{b} {
+    allow read: if has();
+    allow create: if has() && okBen(request.resource.data) && request.resource.data.by==get(U()).data.name;
+    allow update: if canEdit() && okBen(request.resource.data);
     allow delete: if isAdmin();
   }
   match /images/{i} {

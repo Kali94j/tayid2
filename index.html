@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self';script-src 'self' https://www.gstatic.com;style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;connect-src https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com;frame-src https://tayid2.firebaseapp.com;object-src 'none';base-uri 'none';form-action 'none'">
 <meta name="referrer" content="no-referrer"><meta name="theme-color" content="#315743">
 <link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="style.css?v=4"><title>برنامج تأييد الحضور</title></head><body>
+<link rel="stylesheet" href="style.css?v=5"><title>برنامج تأييد الحضور</title></head><body>
 <div id="toast" class="hidden"></div>
 <div id="viewer" class="hidden"><div class="vb"><button class="b del" data-a="vx">✕ إغلاق</button><a class="b" id="vdl" style="text-decoration:none">⬇ تحميل</a><span id="vi"></span></div><img id="vimg" alt=""></div>
 
@@ -26,8 +26,9 @@
 <section class="cd"><h2 id="ft">إضافة سجل جديد</h2>
 <div class="sec">👤 بيانات الشهيد أو المصاب</div><div class="gr">
 <div><label for="personName">الاسم الكامل</label><input type="text" id="personName" maxlength="120"></div>
-<div><label for="statusType">الحالة</label><select id="statusType"><option value="">اختر</option><option>شهيد</option><option>شهيدة</option><option>مصاب</option><option>مصابه</option></select></div></div>
-<div class="sec">🤝 بيانات المستفيد</div><div class="gr">
+<div><label for="statusType">الحالة</label><select id="statusType"><option value="">اختر</option><option>شهيد</option><option>شهيدة</option><option>مصاب</option><option>مصابه</option></select></div>
+<div id="pctW" class="hidden"><label for="pct">نسبة العجز</label><select id="pct"></select></div></div>
+<div id="sBen"><div class="sec">🤝 بيانات المستفيد</div><div class="gr">
 <div class="fw"><label for="beneficiary">اسم المستفيد</label><input type="text" id="beneficiary" maxlength="120"></div>
 <div><label for="relation">صلة القرابة</label><select id="relation"><option value="">اختر</option><option>الاب</option><option>الام</option><option>الزوجه</option><option>الزوجه متزوجه</option><option>الابن</option><option>البنت</option><option>الاخ</option><option>الاخت</option><option>مصاب</option><option>مصابه</option></select></div>
 <div><label for="unified">رقم الموحدة</label><input type="text" id="unified" inputmode="numeric" maxlength="30"></div>
@@ -39,7 +40,7 @@
 <div class="tile" id="t_p" data-k="p">👤 الصورة الشخصية<input type="file" accept="image/*" data-k="p"></div>
 <div class="tile" id="t_f" data-k="f">🪪 الموحدة: الوجه الأمامي<input type="file" accept="image/*" data-k="f"></div>
 <div class="tile" id="t_b" data-k="b">🪪 الموحدة: الوجه الخلفي<input type="file" accept="image/*" data-k="b"></div></div>
-<div class="ac"><button class="b add" id="addB" data-a="add">＋ إضافة</button><button class="b edt hidden" id="edtB" data-a="edt">✎ حفظ التعديل</button><button class="b" data-a="clr">↺ تفريغ</button></div><div id="st" class="st"></div></section>
+</div><div class="ac"><button class="b add" id="addB" data-a="add">＋ إضافة</button><button class="b edt hidden" id="edtB" data-a="edt">✎ حفظ التعديل</button><button class="b" data-a="clr">↺ تفريغ</button></div><div id="st" class="st"></div></section>
 
 <section class="cd"><h2>السجلات</h2><div class="stats"><div><b id="n0">0</b>الإجمالي</div><div><b id="n1">0</b>الشهداء</div><div><b id="n2">0</b>المصابون</div></div>
 <input type="search" id="q" placeholder="ابحث بالاسم أو المستفيد أو الموحدة…"><div id="list" class="cards"></div></section>
@@ -51,4 +52,5 @@
 <div style="align-self:end"><button class="b add" data-a="nu" style="width:100%">＋ إضافة مستخدم</button></div></div>
 <div id="ust" class="st"></div><table><thead><tr><th>المستخدم</th><th>الصلاحية</th><th></th></tr></thead><tbody id="ub"></tbody></table></section>
 </div>
-<script type="module" src="app.js?v=5"></script></body></html>
+<div id="mp" class="hidden"><div class="mpw"><header class="mph"><button class="b" data-a="mc">→ رجوع</button><div><div class="bd" id="mpS"></div><h2 id="mpT"></h2></div></header><div class="ac" style="margin:0 0 6px"><button class="b add" data-a="ab">＋ إضافة مستفيد</button></div><div id="mpb" class="cards"></div></div></div>
+<script type="module" src="app.js?v=6"></script></body></html>

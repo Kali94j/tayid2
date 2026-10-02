@@ -78,3 +78,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px;text-
 #vimg{margin:auto;max-width:100%;max-height:100%;object-fit:contain}
 #toast{position:fixed;z-index:99;left:12px;right:12px;top:calc(env(safe-area-inset-top,0) + 8px);padding:12px;border-radius:12px;color:#fff;text-align:center;font-size:14px;box-shadow:0 6px 20px #0006}
 @media(prefers-reduced-motion:no-preference){.gl{animation:up .5s ease both}@keyframes up{from{opacity:0;transform:translateY(14px)}}}
+
+#mp{position:fixed;inset:0;z-index:60;overflow:auto;background:var(--bg);padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.mpw{max-width:1100px;margin:auto;padding:14px}.mph{display:flex;align-items:center;gap:14px;margin-bottom:12px}.mph h2{margin:4px 0 0;font-size:20px}
+.rc[data-a]{cursor:pointer}.rc.ben{margin:0}
