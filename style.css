@@ -14,7 +14,7 @@ button,input,select{font:inherit}
 .fl{display:flex;align-items:center;gap:10px;direction:ltr;height:52px;padding:0 14px;margin-bottom:12px;border-radius:15px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16)}
 .fl:focus-within{border-color:#5fd0c8;box-shadow:0 0 0 4px rgba(95,208,200,.18)}
 .fl svg{width:20px;height:20px;flex:none;color:#8fd6d0}
-.fl input{flex:1;min-width:0;height:100%;background:none;border:0;outline:0;color:#fff;font-size:15px}.fl input::placeholder{color:#8fa5ad}
+.gl .fl input[type]{flex:1;min-width:0;height:100%;padding:0;background:none;border:0;border-radius:0;box-shadow:none;outline:0;color:#fff;font-size:15px}.fl input::placeholder{color:#8fa5ad}
 .fl button{background:none;border:0;color:#8fd6d0;cursor:pointer;padding:4px}
 .go{width:100%;height:52px;margin-top:6px;border:0;border-radius:15px;color:#fff;font-weight:700;font-size:16px;cursor:pointer;background:linear-gradient(100deg,#0f9f90,#1d6fd0);box-shadow:0 10px 26px rgba(20,110,200,.4)}
 .go:disabled{opacity:.6}.go:active{transform:scale(.98)}
