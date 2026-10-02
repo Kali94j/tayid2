@@ -3,20 +3,22 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self';script-src 'self' https://www.gstatic.com;style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;connect-src https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com;frame-src https://tayid-alhudur.firebaseapp.com;object-src 'none';base-uri 'none';form-action 'none'">
 <meta name="referrer" content="no-referrer"><meta name="theme-color" content="#315743">
 <link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="style.css"><title>برنامج تأييد الحضور</title></head><body>
+<link rel="stylesheet" href="style.css?v=3"><title>برنامج تأييد الحضور</title></head><body>
 <div id="toast" class="hidden"></div>
 <div id="viewer" class="hidden"><div class="vb"><button class="b del" data-a="vx">✕ إغلاق</button><a class="b" id="vdl" style="text-decoration:none">⬇ تحميل</a><span id="vi"></span></div><img id="vimg" alt=""></div>
 
-<div id="login"><i class="o o1"></i><i class="o o2"></i><i class="o o3"></i>
-<main class="gl"><div class="lg"><svg width="40" height="40" viewBox="0 0 100 100"><path fill="#fff" d="M16 42c10-13 25-15 36-7 4-4 10-6 16-4-2 5-5 8-9 10 3 9-2 19-13 25l-15 8 4-15c-8-3-15-9-19-17z"/><path d="M66 40q9-5 15-17" stroke="#fff" stroke-width="2.5" fill="none"/><g fill="#8af0dc"><ellipse cx="80" cy="22" rx="3.2" ry="6"/><ellipse cx="74" cy="29" rx="3" ry="5.5"/><ellipse cx="85" cy="30" rx="3" ry="5.5"/></g></svg></div>
-<h1 id="lt">تسجيل الدخول</h1><p>برنامج تأييد الحضور</p>
-<label class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg><input id="lu" type="text" placeholder="اسم المستخدم" autocomplete="username" autocapitalize="off"></label>
-<label class="fl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.2"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/></svg><input id="lp" type="password" placeholder="كلمة المرور" autocomplete="current-password"><button type="button" data-a="eye" aria-label="إظهار">👁</button></label>
-<button class="go" id="lb">دخول</button><div class="lm" id="lm"></div>
-<label class="rm"><input type="checkbox" id="rem" checked> تذكرني على هذا الجهاز</label>
-<button class="lnk hidden" id="sb" data-a="setup">أول استخدام؟ أنشئ حساب المدير</button>
-<div class="lk">🔒 اتصال مشفّر · تنتهي الجلسة تلقائيًا بعد 20 دقيقة خمول</div></main></div>
-
+<div id="login"><div class="stg"><main class="lcard">
+<img class="llogo" src="logo.png" alt="" width="203" height="203">
+<h1 id="lt">تسجيل الدخول</h1><p class="lsub">مرحباً بك في برنامج تأييد الحضور</p><i class="lbar"></i>
+<label class="lf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4.2"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z"/></svg><input id="lu" type="text" placeholder="اسم المستخدم" autocomplete="username" autocapitalize="off"></label>
+<label class="lf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.2"/><path d="M8 10.5V8a4 4 0 018 0v2.5"/><circle cx="12" cy="15.5" r="1.1" fill="currentColor"/></svg><input id="lp" type="password" placeholder="كلمة المرور" autocomplete="current-password"><button type="button" data-a="eye" aria-label="إظهار كلمة المرور"><svg class="a" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 12s3.8-7 10-7 10 7 10 7-3.8 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg><svg class="b" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 12s3.8-7 10-7 10 7 10 7-3.8 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></label>
+<button class="lgo" id="lb" type="button"><span id="lbt">دخول</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button><div class="lm" id="lm"></div>
+<label class="lrem"><input type="checkbox" id="rem" checked><span>تذكرني</span></label>
+<button class="llnk hidden" id="sb" type="button" data-a="setup">أول استخدام؟ أنشئ حساب المدير</button>
+<svg class="lleaf" viewBox="0 0 120 120" aria-hidden="true"><g fill="#17b8a6"><path d="M60 8c22 8 28 30 14 44-20-4-24-30-14-44z"/><path d="M20 40c24-4 40 12 34 30-24 4-40-10-34-30z"/><path d="M10 80c18-6 32 4 32 20-18 8-34-2-32-20z" fill="#2fd0a8"/></g><path d="M8 118C30 80 50 50 78 14" stroke="#0e9c92" stroke-width="3" fill="none"/></svg>
+<div class="ltag">معاً من أجل مستقبل أفضل</div>
+<svg class="lwave" viewBox="0 0 696 140" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="w1" x1="0" x2="1"><stop offset="0" stop-color="#0a8fe8"/><stop offset="1" stop-color="#15d1b4"/></linearGradient></defs><path d="M0 70C140 30 260 100 400 70S600 0 696 30V140H0Z" fill="#2ed8c0" opacity=".9"/><path d="M0 100C150 60 300 120 450 90S620 70 696 85V140H0Z" fill="url(#w1)"/><path d="M0 125C200 100 420 140 696 110V140H0Z" fill="#0a7fe0" opacity=".85"/></svg>
+</main></div></div>
 <div class="wrap hidden" id="app">
 <header class="hd"><div><h1>برنامج تأييد الحضور</h1><small><span id="dot" class="dot"></span><span id="conn">جارٍ الاتصال…</span></small></div></header>
 <div class="cd bar"><div><span class="av" id="av">؟</span><b id="me"></b> <small id="role"></small></div><div><button class="b hidden" id="ib" data-a="inst">📲 تثبيت</button> <button class="b" data-a="out">⎋ خروج</button></div></div>
@@ -49,4 +51,4 @@
 <div style="align-self:end"><button class="b add" data-a="nu" style="width:100%">＋ إضافة مستخدم</button></div></div>
 <div id="ust" class="st"></div><table><thead><tr><th>المستخدم</th><th>الصلاحية</th><th></th></tr></thead><tbody id="ub"></tbody></table></section>
 </div>
-<script type="module" src="app.js"></script></body></html>
+<script type="module" src="app.js?v=3"></script></body></html>
