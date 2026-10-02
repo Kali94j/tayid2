@@ -86,3 +86,9 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px;text-
 .ev{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--ln);font-size:13.5px}.ev i{font-style:normal}.ev small{display:block;color:var(--mu);margin-top:2px}
 
 #pw{position:fixed;inset:0;z-index:70;background:#000b;display:grid;place-items:center;padding:16px}.pwc{background:var(--cd);border:1px solid var(--ln);border-radius:20px;padding:20px;width:min(420px,100%)}.at details{font-size:13px;width:100%}.at summary{cursor:pointer;color:var(--mu)}
+
+#ap{position:fixed;inset:0;z-index:60;overflow:auto;background:var(--bg);padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+#bell{position:relative}.bn{position:absolute;top:-7px;left:-7px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#e0443a;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;box-shadow:0 2px 8px #0006}
+.ring{animation:ring .8s ease 4}@keyframes ring{0%,100%{transform:rotate(0)}25%{transform:rotate(-16deg)}75%{transform:rotate(16deg)}}
+.ev>div{flex:1;min-width:0}.ev .del{padding:6px 11px;font-size:13px}.nw{background:#e0443a;color:#fff;border-radius:8px;padding:1px 7px;font-size:11px}
+#toast{font-weight:700}

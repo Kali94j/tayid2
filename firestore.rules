@@ -31,14 +31,14 @@ service cloud.firestore {
   }
   match /records/{r} {
     allow read: if has();
-    allow create: if has() && okRec(request.resource.data) && request.resource.data.by==get(U()).data.name;
+    allow create: if (has() && okRec(request.resource.data) && request.resource.data.by==get(U()).data.name) || (isAdmin() && okRec(request.resource.data));
     allow update: if (canEdit() && okRec(request.resource.data))
       || (has() && okRec(request.resource.data) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bc','sk','ld','att','attendanceDate','updatedAt']));
     allow delete: if isAdmin();
   }
   match /bens/{b} {
     allow read: if has();
-    allow create: if has() && okBen(request.resource.data) && request.resource.data.by==get(U()).data.name;
+    allow create: if (has() && okBen(request.resource.data) && request.resource.data.by==get(U()).data.name) || (isAdmin() && okBen(request.resource.data));
     allow update: if (canEdit() && okBen(request.resource.data))
       || (has() && okBen(request.resource.data) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['att','attendanceDate','updatedAt']));
     allow delete: if isAdmin();
