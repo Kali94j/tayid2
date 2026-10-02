@@ -1,7 +1,7 @@
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import {getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,onAuthStateChanged,deleteUser,setPersistence,browserLocalPersistence,browserSessionPersistence} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 import {getFirestore,collection,doc,getDoc,setDoc,updateDoc,deleteDoc,query,orderBy,onSnapshot,writeBatch} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-const cfg={apiKey:"AIzaSyAQ-odIjvYhIdqwAB7-L3ncuj0_xLCjFNk",authDomain:"tayid-alhudur.firebaseapp.com",projectId:"tayid-alhudur",storageBucket:"tayid-alhudur.firebasestorage.app",messagingSenderId:"171273581864",appId:"1:171273581864:web:62a107b4b7070687ddcc1d"};
+const cfg={apiKey:"AIzaSyDwQzQe_JRN4ENr95ov_Cgpo6qYLWXAZ6U",authDomain:"tayid2.firebaseapp.com",projectId:"tayid2",storageBucket:"tayid2.firebasestorage.app",messagingSenderId:"516822353811",appId:"1:516822353811:web:67848b3dc2ee79be80ca66"};
 const app=initializeApp(cfg),auth=getAuth(app),fs=getFirestore(app),auth2=getAuth(initializeApp(cfg,"sec"));
 const $=i=>document.getElementById(i),val=i=>$(i).value.trim(),JP="data:image/jpeg;base64,";
 const F=["personName","statusType","beneficiary","relation","unified","district","birthDate","attendanceDate"];
