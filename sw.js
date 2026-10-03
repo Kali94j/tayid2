@@ -1,4 +1,4 @@
-const C="tayid-v8",A=["./","./index.html","./style.css","./app.js","./manifest.json","./icon-192.png","./icon-512.png","./login-bg.jpg","./logo.png"];
+const C="tayid-v9",A=["./","./index.html","./style.css","./app.js","./manifest.json","./icon-192.png","./icon-512.png","./login-bg.jpg","./logo.png"];
 const put=(r,x)=>{if(x.ok){const y=x.clone();caches.open(C).then(c=>c.put(r,y))}return x};
 const net=r=>new Promise((ok,no)=>{const t=setTimeout(no,3000);fetch(r).then(x=>{clearTimeout(t);ok(x)},e=>{clearTimeout(t);no(e)})});
 self.addEventListener("install",e=>e.waitUntil(caches.open(C).then(c=>Promise.all(A.map(u=>c.add(u).catch(()=>{})))).then(()=>self.skipWaiting())));

@@ -3,7 +3,7 @@ service cloud.firestore {
  match /databases/{db}/documents {
   function sig(){return request.auth!=null}
   function U(){return /databases/$(db)/documents/users/$(request.auth.uid)}
-  function has(){return sig() && exists(U())}
+  function has(){return sig() && exists(U()) && get(U()).data.get('off', false) == false}
   function role(){return get(U()).data.role}
   function canEdit(){return has() && role() in ['editor','admin']}
   function isAdmin(){return has() && role()=='admin'}
@@ -23,7 +23,7 @@ service cloud.firestore {
   match /meta/setup { allow read: if true;
     allow create: if sig() && request.resource.data.by==request.auth.uid && getAfter(/databases/$(db)/documents/users/$(request.auth.uid)).data.role=='admin'; }
   match /users/{u} {
-    allow read: if has() && (isAdmin() || request.auth.uid==u);
+    allow read: if (sig() && request.auth.uid==u) || isAdmin();
     allow create: if (isAdmin() && request.auth.uid!=u && request.resource.data.role in ['user','editor','admin'])
       || (sig() && request.auth.uid==u && request.resource.data.role=='admin' && !exists(/databases/$(db)/documents/meta/setup));
     allow update: if isAdmin() && request.auth.uid!=u && request.resource.data.role in ['user','editor','admin'];
@@ -51,7 +51,7 @@ service cloud.firestore {
   }
   match /activity/{a} {
     allow read: if isAdmin();
-    allow create: if has() && request.resource.data.keys().hasOnly(['t','u','x','at']) && request.resource.data.t in ['login','add','del','att']
+    allow create: if has() && request.resource.data.keys().hasOnly(['t','u','x','at']) && request.resource.data.t in ['login','add','del','att','edit']
       && request.resource.data.u==get(U()).data.name && request.resource.data.x is string && request.resource.data.x.size()<=200 && request.resource.data.at is number;
     allow update: if false;
     allow delete: if isAdmin();

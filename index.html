@@ -1,9 +1,9 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self';script-src 'self' https://www.gstatic.com;style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;connect-src https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com;frame-src https://tayid2.firebaseapp.com;object-src 'none';base-uri 'none';form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self';script-src 'self' https://www.gstatic.com https://www.google.com;style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;connect-src https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://www.google.com;frame-src https://tayid2.firebaseapp.com https://www.google.com https://recaptcha.google.com;object-src 'none';base-uri 'none';form-action 'none'">
 <meta name="referrer" content="no-referrer"><meta name="theme-color" content="#315743">
 <link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="style.css?v=8"><title>برنامج تأييد الحضور</title></head><body>
+<link rel="stylesheet" href="style.css?v=9"><title>برنامج تأييد الحضور</title></head><body>
 <div id="toast" class="hidden"></div>
 <div id="viewer" class="hidden"><div class="vb"><button class="b del" data-a="vx">✕ إغلاق</button><a class="b" id="vdl" style="text-decoration:none">⬇ تحميل</a><span id="vi"></span></div><img id="vimg" alt=""></div>
 
@@ -21,7 +21,8 @@
 </main></div></div>
 <div class="wrap hidden" id="app">
 <header class="hd"><div><h1>برنامج تأييد الحضور</h1><small><span id="dot" class="dot"></span><span id="conn">جارٍ الاتصال…</span></small></div></header>
-<div class="cd bar"><div><span class="av" id="av">؟</span><b id="me"></b> <small id="role"></small></div><div><button class="b hidden" id="ib" data-a="inst">📲 تثبيت</button> <button class="b hidden" id="bell" data-a="ap" aria-label="سجل نشاط المستخدمين">🔔<span id="bn" class="bn hidden"></span></button> <button class="b" data-a="pw" aria-label="تغيير كلمة السر">🔑</button> <button class="b" data-a="out">⎋ خروج</button></div></div>
+<div class="cd bar"><div class="who"><span class="av" id="av">؟</span><div><b id="me"></b><small id="role"></small></div></div><div class="tb"><button class="ib hidden" id="ib" data-a="inst" aria-label="تثبيت البرنامج">📲</button><button class="ib hidden" id="bell" data-a="ap" aria-label="سجل نشاط المستخدمين">🔔<span id="bn" class="bn hidden"></span></button><button class="ib" data-a="pw" aria-label="تغيير كلمة السر">🔑</button><button class="ib out" data-a="out" aria-label="خروج">⎋<span>خروج</span></button></div></div>
+<div id="bkn" class="cd bkn hidden"><span id="bkt"></span><button class="b add" data-a="zip">📦 تحميل نسخة الآن</button></div>
 
 <section class="cd"><h2 id="ft">إضافة سجل جديد</h2>
 <div class="sec">👤 بيانات الشهيد أو المصاب</div><div class="gr">
@@ -43,16 +44,17 @@
 </div><div class="ac"><button class="b add" id="addB" data-a="add">＋ إضافة</button><button class="b edt hidden" id="edtB" data-a="edt">✎ حفظ التعديل</button><button class="b" data-a="clr">↺ تفريغ</button></div><div id="st" class="st"></div></section>
 
 <section class="cd"><h2>السجلات</h2><div class="stats"><div><b id="n0">0</b>الإجمالي</div><div><b id="n1">0</b>الشهداء</div><div><b id="n2">0</b>المصابون</div></div>
-<input type="search" id="q" placeholder="ابحث بالاسم أو المستفيد أو الموحدة…"><div id="list" class="cards"></div></section>
+<input type="search" id="q" placeholder="ابحث بالاسم أو المستفيد أو الموحدة…"><details class="fl2"><summary>🔎 فلاتر متقدمة</summary><div class="gr" style="margin-top:10px"><div><label for="fSt">الحالة</label><select id="fSt"><option value="">الكل</option><option>شهيد</option><option>شهيدة</option><option>مصاب</option><option>مصابه</option></select></div><div><label for="fDi">محل النفوس</label><select id="fDi"></select></div><div><label for="fPc">نسبة العجز</label><select id="fPc"></select></div><div style="align-self:end"><button class="b" data-a="fr" style="width:100%">↺ إعادة ضبط</button></div></div></details><div id="list" class="cards"></div></section>
 
 <section class="cd hidden" id="adm"><h2>إدارة المستخدمين</h2><div class="gr">
 <div><label for="nu">اسم مستخدم جديد</label><input type="text" id="nu" autocomplete="off"></div>
 <div><label for="np">كلمة السر (8 أحرف على الأقل)</label><input type="password" id="np" autocomplete="new-password"></div>
 <div><label for="nr">الصلاحية</label><select id="nr"><option value="user">مستخدم (إضافة)</option><option value="editor">محرر (+تعديل)</option><option value="admin">مدير (+حذف وإدارة)</option></select></div>
 <div style="align-self:end"><button class="b add" data-a="nu" style="width:100%">＋ إضافة مستخدم</button></div></div>
-<div id="ust" class="st"></div><table><thead><tr><th>المستخدم</th><th>الصلاحية</th><th></th></tr></thead><tbody id="ub"></tbody></table><h2 style="margin-top:22px">💾 النسخ الاحتياطي والتصدير</h2><div class="ac"><button class="b add" data-a="csv">📊 تصدير Excel</button><button class="b add" data-a="zip">📦 ملف ZIP (صور حقيقية)</button><button class="b" data-a="bkf">🗂 نسخة JSON كاملة</button><button class="b" data-a="rs">♻ استعادة من ملف</button></div><input type="file" id="rsf" accept=".json,.zip,application/json,application/zip" class="hidden"></section>
+<div id="ust" class="st"></div><table><thead><tr><th>المستخدم</th><th>الصلاحية</th><th></th></tr></thead><tbody id="ub"></tbody></table><h2 style="margin-top:22px">💾 النسخ الاحتياطي والتصدير</h2><div class="tg"><button class="b add" data-a="csv">📊 تصدير Excel</button><button class="b add" data-a="zip">📦 ملف ZIP (صور حقيقية)</button><button class="b" data-a="bkf">🗂 نسخة JSON كاملة</button><button class="b" data-a="rs">♻ استعادة من ملف</button></div><input type="file" id="rsf" accept=".json,.zip,application/json,application/zip" class="hidden"></section>
 </div>
-<div id="mp" class="hidden"><div class="mpw"><header class="mph"><button class="b" data-a="mc">→ رجوع</button><div><div class="bd" id="mpS"></div><h2 id="mpT"></h2></div></header><div class="ac" style="margin:0 0 6px"><button class="b add" data-a="ab">＋ إضافة مستفيد</button></div><div id="mpb" class="cards"></div></div></div>
+<div id="mp" class="hidden"><div class="mpw"><header class="mph"><button class="b" data-a="mc">→ رجوع</button><div><div class="bd" id="mpS"></div><h2 id="mpT"></h2></div></header><div class="ac" style="margin:0 0 6px"><button class="b add" data-a="ab">＋ إضافة مستفيد</button><button class="b" data-a="prm">🖨 طباعة الكشف</button></div><div id="mpb" class="cards"></div></div></div>
 <div id="ap" class="hidden"><div class="mpw"><header class="mph"><button class="b" data-a="apx">→ رجوع</button><h2>🔔 سجل نشاط المستخدمين</h2></header><div class="ac" style="margin:0 0 8px"><button class="b" data-a="ntf">تفعيل إشعارات الجهاز</button><button class="b del" data-a="dall">حذف الكل</button></div><div id="act" class="cd" style="margin-top:6px"></div></div></div>
+<div id="pr"></div>
 <div id="pw" class="hidden"><div class="pwc"><h2>🔑 تغيير كلمة السر</h2><label for="pw0">كلمة السر الحالية</label><input type="password" id="pw0" autocomplete="current-password"><label for="pw1" style="margin-top:10px">الجديدة (8 أحرف على الأقل)</label><input type="password" id="pw1" autocomplete="new-password"><label for="pw2" style="margin-top:10px">تأكيد الجديدة</label><input type="password" id="pw2" autocomplete="new-password"><div id="pwm" class="st"></div><div class="ac"><button class="b add" data-a="pws">حفظ</button><button class="b" data-a="pwx">إلغاء</button></div></div></div>
-<script type="module" src="app.js?v=10"></script></body></html>
+<script type="module" src="app.js?v=11"></script></body></html>
