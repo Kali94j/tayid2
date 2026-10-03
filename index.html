@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self';script-src 'self' https://www.gstatic.com https://www.google.com;style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;connect-src https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://www.google.com;frame-src https://tayid2.firebaseapp.com https://www.google.com https://recaptcha.google.com;object-src 'none';base-uri 'none';form-action 'none'">
 <meta name="referrer" content="no-referrer"><meta name="theme-color" content="#315743">
 <link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="style.css?v=9"><title>برنامج تأييد الحضور</title></head><body>
+<link rel="stylesheet" href="style.css?v=10"><title>برنامج تأييد الحضور</title></head><body>
 <div id="toast" class="hidden"></div>
 <div id="viewer" class="hidden"><div class="vb"><button class="b del" data-a="vx">✕ إغلاق</button><a class="b" id="vdl" style="text-decoration:none">⬇ تحميل</a><span id="vi"></span></div><img id="vimg" alt=""></div>
 
@@ -21,8 +21,9 @@
 </main></div></div>
 <div class="wrap hidden" id="app">
 <header class="hd"><div><h1>برنامج تأييد الحضور</h1><small><span id="dot" class="dot"></span><span id="conn">جارٍ الاتصال…</span></small></div></header>
-<div class="cd bar"><div class="who"><span class="av" id="av">؟</span><div><b id="me"></b><small id="role"></small></div></div><div class="tb"><button class="ib hidden" id="ib" data-a="inst" aria-label="تثبيت البرنامج">📲</button><button class="ib hidden" id="bell" data-a="ap" aria-label="سجل نشاط المستخدمين">🔔<span id="bn" class="bn hidden"></span></button><button class="ib" data-a="pw" aria-label="تغيير كلمة السر">🔑</button><button class="ib out" data-a="out" aria-label="خروج">⎋<span>خروج</span></button></div></div>
+<div class="cd bar"><div class="who"><span class="av" id="av">؟</span><div><b id="me"></b><small id="role"></small></div></div><div class="tb"><button class="ib hidden" id="bell" data-a="ap" aria-label="سجل نشاط المستخدمين">🔔<span id="bn" class="bn hidden"></span></button><button class="ib" data-a="mn" aria-label="القائمة">☰</button></div></div>
 <div id="bkn" class="cd bkn hidden"><span id="bkt"></span><button class="b add" data-a="zip">📦 تحميل نسخة الآن</button></div>
+<div id="adn" class="cd bkn hidden"><span>⚠ لديك حساب مدير واحد فقط. أنشئ مديرًا احتياطيًا (اختر الصلاحية «مدير» في إدارة المستخدمين) حتى لا تفقد الوصول إن نسيت كلمة السر.</span></div>
 
 <section class="cd"><h2 id="ft">إضافة سجل جديد</h2>
 <div class="sec">👤 بيانات الشهيد أو المصاب</div><div class="gr">
@@ -51,10 +52,24 @@
 <div><label for="np">كلمة السر (8 أحرف على الأقل)</label><input type="password" id="np" autocomplete="new-password"></div>
 <div><label for="nr">الصلاحية</label><select id="nr"><option value="user">مستخدم (إضافة)</option><option value="editor">محرر (+تعديل)</option><option value="admin">مدير (+حذف وإدارة)</option></select></div>
 <div style="align-self:end"><button class="b add" data-a="nu" style="width:100%">＋ إضافة مستخدم</button></div></div>
-<div id="ust" class="st"></div><table><thead><tr><th>المستخدم</th><th>الصلاحية</th><th></th></tr></thead><tbody id="ub"></tbody></table><h2 style="margin-top:22px">💾 النسخ الاحتياطي والتصدير</h2><div class="tg"><button class="b add" data-a="csv">📊 تصدير Excel</button><button class="b add" data-a="zip">📦 ملف ZIP (صور حقيقية)</button><button class="b" data-a="bkf">🗂 نسخة JSON كاملة</button><button class="b" data-a="rs">♻ استعادة من ملف</button></div><input type="file" id="rsf" accept=".json,.zip,application/json,application/zip" class="hidden"></section>
+<div id="ust" class="st"></div><table><thead><tr><th>المستخدم</th><th>الصلاحية</th><th></th></tr></thead><tbody id="ub"></tbody></table><h2 style="margin-top:22px">💾 النسخ الاحتياطي والتصدير</h2><div class="tg"><button class="b add" data-a="csv">📊 تصدير Excel</button><button class="b add" data-a="zip">📦 ملف ZIP (صور حقيقية)</button><button class="b" data-a="bkf">🗂 نسخة JSON كاملة</button><button class="b" data-a="rs">♻ استعادة من ملف</button><button class="b" data-a="im">📥 استيراد من Excel</button><button class="b" data-a="tpl">📄 قالب الاستيراد</button></div><input type="file" id="imf" accept=".xlsx,.csv,text/csv" class="hidden"><div id="sto" class="cd" style="margin-top:12px"></div><input type="file" id="rsf" accept=".json,.zip,application/json,application/zip" class="hidden"></section>
 </div>
 <div id="mp" class="hidden"><div class="mpw"><header class="mph"><button class="b" data-a="mc">→ رجوع</button><div><div class="bd" id="mpS"></div><h2 id="mpT"></h2></div></header><div class="ac" style="margin:0 0 6px"><button class="b add" data-a="ab">＋ إضافة مستفيد</button><button class="b" data-a="prm">🖨 طباعة الكشف</button></div><div id="mpb" class="cards"></div></div></div>
 <div id="ap" class="hidden"><div class="mpw"><header class="mph"><button class="b" data-a="apx">→ رجوع</button><h2>🔔 سجل نشاط المستخدمين</h2></header><div class="ac" style="margin:0 0 8px"><button class="b" data-a="ntf">تفعيل إشعارات الجهاز</button><button class="b del" data-a="dall">حذف الكل</button></div><div id="act" class="cd" style="margin-top:6px"></div></div></div>
+<div id="mn" class="sh hidden"><div class="sc"><div class="sg-h"><b>القائمة</b><button class="ib" data-a="mx" aria-label="إغلاق">✕</button></div>
+<button class="mi hidden" id="miSt" data-a="stp">📊 الإحصائيات والتقارير</button>
+<button class="mi" data-a="pw">🔑 تغيير كلمة السر</button>
+<button class="mi" data-a="sg">⚙ الإعدادات والقفل</button>
+<button class="mi hidden" id="ib" data-a="inst">📲 تثبيت البرنامج</button>
+<button class="mi out" data-a="out">⎋ تسجيل الخروج</button></div></div>
+<div id="sg" class="sh hidden"><div class="sc"><div class="sg-h"><b>⚙ الإعدادات والقفل</b><button class="ib" data-a="sgx" aria-label="إغلاق">✕</button></div>
+<label for="sLk">القفل التلقائي بعد فترة خمول</label><select id="sLk"><option value="0">معطّل</option><option value="1">بعد دقيقة</option><option value="2">بعد دقيقتين</option><option value="5">بعد 5 دقائق</option><option value="10">بعد 10 دقائق</option><option value="15">بعد 15 دقيقة</option><option value="30">بعد 30 دقيقة</option></select>
+<label for="sPn">رمز PIN (4 إلى 6 أرقام)</label><input type="password" id="sPn" inputmode="numeric" maxlength="6" placeholder="اتركه فارغًا إن لم تغيّره" autocomplete="off">
+<label class="ck"><input type="checkbox" id="sOff"> العمل بدون إنترنت (يحفظ نسخة من البيانات على هذا الجهاز)</label>
+<div id="sgm" class="st"></div><div class="ac"><button class="b add" data-a="sgs">حفظ</button><button class="b del" data-a="sgd">حذف الرمز</button></div>
+<small style="color:var(--mu)">الرمز لقفل الشاشة على هذا الجهاز فقط، وبعد 5 محاولات خاطئة يُسجَّل خروجك.</small></div></div>
+<div id="rp" class="hidden"><div class="mpw"><header class="mph"><button class="b" data-a="stx">→ رجوع</button><h2>📊 الإحصائيات والتقارير</h2></header><div class="tabs"><button class="tab on" data-a="tab" data-k="s">📊 الإحصائيات</button><button class="tab" data-a="tab" data-k="m">⚠ النواقص</button><button class="tab hidden" id="tbT" data-a="tab" data-k="t">🗑 المحذوفات</button></div><div id="stb"></div></div></div>
+<div id="lk" class="hidden"><div class="lkc"><div style="font-size:42px">🔒</div><h2>البرنامج مقفل</h2><div id="lkd" class="dots"></div><div id="lkm" class="st" style="color:#ffb4aa"></div><div class="pad"><button data-a="pd" data-k="1">1</button><button data-a="pd" data-k="2">2</button><button data-a="pd" data-k="3">3</button><button data-a="pd" data-k="4">4</button><button data-a="pd" data-k="5">5</button><button data-a="pd" data-k="6">6</button><button data-a="pd" data-k="7">7</button><button data-a="pd" data-k="8">8</button><button data-a="pd" data-k="9">9</button><span></span><button data-a="pd" data-k="0">0</button><button data-a="pd" data-k="clr" aria-label="حذف">⌫</button></div><button class="lnk2" data-a="out">نسيت الرمز؟ تسجيل الخروج</button></div></div>
 <div id="pr"></div>
 <div id="pw" class="hidden"><div class="pwc"><h2>🔑 تغيير كلمة السر</h2><label for="pw0">كلمة السر الحالية</label><input type="password" id="pw0" autocomplete="current-password"><label for="pw1" style="margin-top:10px">الجديدة (8 أحرف على الأقل)</label><input type="password" id="pw1" autocomplete="new-password"><label for="pw2" style="margin-top:10px">تأكيد الجديدة</label><input type="password" id="pw2" autocomplete="new-password"><div id="pwm" class="st"></div><div class="ac"><button class="b add" data-a="pws">حفظ</button><button class="b" data-a="pwx">إلغاء</button></div></div></div>
-<script type="module" src="app.js?v=11"></script></body></html>
+<script type="module" src="app.js?v=12"></script></body></html>
