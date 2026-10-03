@@ -13,7 +13,7 @@ const RN={user:"مستخدم",editor:"محرر",admin:"مدير"},TL={p:"👤 ا
 let trR=[],ou="",ob=null,lim=20,recs=[],sel=null,selB=null,tgt=null,mp=null,unB=null,bens=[],pend={},me=null,started=false,busy=false,setup=false,tt,idle,armed={},canE=false,canD=false;
 const RC=collection(fs,"records");
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const E={"auth/invalid-credential":"اسم المستخدم أو كلمة السر غير صحيحة.","auth/user-not-found":"اسم المستخدم أو كلمة السر غير صحيحة.","auth/wrong-password":"اسم المستخدم أو كلمة السر غير صحيحة.","auth/weak-password":"كلمة السر ضعيفة.","auth/email-already-in-use":"هذا الاسم مستخدم مسبقًا.","auth/network-request-failed":"لا يوجد اتصال بالإنترنت.","auth/too-many-requests":"محاولات كثيرة، حاول لاحقًا.","permission-denied":"ليس لديك صلاحية لهذه العملية."};
+const E={"auth/invalid-credential":"اسم المستخدم أو كلمة السر غير صحيحة.","auth/user-not-found":"اسم المستخدم أو كلمة السر غير صحيحة.","auth/wrong-password":"اسم المستخدم أو كلمة السر غير صحيحة.","auth/weak-password":"كلمة السر ضعيفة.","auth/email-already-in-use":"هذا الاسم مستخدم مسبقًا.","auth/network-request-failed":"لا يوجد اتصال بالإنترنت.","auth/too-many-requests":"محاولات كثيرة، حاول لاحقًا.","permission-denied":"رفض Firebase هذه العملية. إن كنت مديرًا فانشر آخر نسخة من firestore.rules في Firebase ← Rules."};
 const err=e=>E[e.code]||e.message||"حدث خطأ";
 const norm=s=>String(s||"").replace(/[\u064B-\u065F\u0640]/g,"").replace(/[أإآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/\s+/g," ").trim().toLowerCase();
 const mail=async n=>[...new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(n.trim().toLowerCase())))].slice(0,16).map(b=>b.toString(16).padStart(2,"0")).join("")+"@tayid.app";
@@ -28,7 +28,7 @@ function renderAct(){const l=lseen(),o=acts.filter(e=>e.u!==me.name),b=$("bn");b
  $("act").innerHTML=acts.map(e=>`<div class="ev"><i>${IE[e.t]||"•"}</i><div><b>${esc(e.u)}</b> ${esc(e.x)}${e.at>l&&e.u!==me.name?' <span class="nw">جديد</span>':""}<small>${new Date(e.at).toLocaleString("ar",{dateStyle:"short",timeStyle:"short"})}</small></div><button class="b del" data-a="da" data-id="${esc(e.id)}" aria-label="حذف">✕</button></div>`).join("")||'<div class="st">لا يوجد نشاط.</div>'}
 function watchAct(){$("bell").classList.remove("hidden");onSnapshot(query(collection(fs,"activity"),orderBy("at","desc"),limit(100)),s=>{
  if(!first)s.docChanges().forEach(c=>{if(c.type==="added"){const e=c.doc.data();if(e.u!==me.name){notify((IE[e.t]||"")+" "+e.u+": "+e.x);$("bell").classList.add("ring");setTimeout(()=>$("bell").classList.remove("ring"),4e3)}}});first=false;
- acts=s.docs.map(d=>({id:d.id,...d.data()}));renderAct()},e=>say(err(e)))}
+ acts=s.docs.map(d=>({id:d.id,...d.data()}));renderAct()},e=>say(err(e)+" [سجل النشاط]"))}
 const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
 async function att(id){const td=today(),bn=mp&&id!==mp?bens.find(y=>y.id===id):null,x=bn||recs.find(y=>y.id===id);if(!x)return;
  if((x.att||[]).includes(td))return say("حضور اليوم مؤكَّد مسبقًا.");
@@ -153,7 +153,7 @@ async function pws(){const o=$("pw0").value,n=$("pw1").value,c=$("pw2").value,m=
  if(n.length<8)return m.textContent="كلمة السر الجديدة 8 أحرف على الأقل.";if(n!==c)return m.textContent="كلمتا السر غير متطابقتين.";if(n===o)return m.textContent="اختر كلمة مختلفة عن الحالية.";
  try{const u=auth.currentUser;await reauthenticateWithCredential(u,EmailAuthProvider.credential(u.email,o));await updatePassword(u,n);["pw0","pw1","pw2"].forEach(i=>$(i).value="");m.style.color="#3e8a55";m.textContent="✓ تم تغيير كلمة السر.";setTimeout(()=>$("pw").classList.add("hidden"),1500)}catch(e){m.textContent=err(e)}}
 function ask(k,m){if(armed[k]&&Date.now()-armed[k]<5000){delete armed[k];return true}armed[k]=Date.now();say(m);return false}
-const guard=fn=>fn().catch(e=>say(err(e)));
+const guard=(fn,n)=>fn().catch(e=>say(err(e)+(n&&e&&e.code==="permission-denied"?" ["+n+"]":"")));
 // ضغط الصورة وإعادة ترميزها (يحذف بيانات EXIF/الموقع)
 const TP=[[260,.82],[220,.7],[180,.6]],TC=[[1600,.86],[1600,.78],[1400,.78],[1400,.7],[1200,.7],[1100,.62]];
 const shrink=(f,T,lim)=>new Promise((ok,no)=>{const u=URL.createObjectURL(f),i=new Image();i.onerror=()=>no(Error("صورة غير صالحة"));i.onload=()=>{URL.revokeObjectURL(u);let c,last=0;for(const[m,q]of T){if(m!==last){const k=Math.min(1,m/Math.max(i.width,i.height));c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);const x=c.getContext("2d");x.imageSmoothingQuality="high";x.drawImage(i,0,0,c.width,c.height);last=m}const d=c.toDataURL("image/jpeg",q);if(d.length<=lim)return ok(d)}no(Error("الصورة كبيرة جدًا، جرّب صورة أخرى."))};i.src=u});
@@ -267,7 +267,7 @@ const A={
  du:async id=>{if(ask("u"+id,"اضغط «حذف» مرة أخرى لحذف المستخدم."))await deleteDoc(doc(fs,"users",id))},
  inst:async()=>{if(!dp)return;dp.prompt();await dp.userChoice;dp=null;$("ib").classList.add("hidden")}};
 let dp=null;
-document.addEventListener("click",e=>{const el=e.target.closest("[data-a]");if(el&&A[el.dataset.a]){if(el.closest("#mn")&&el.dataset.a!=="mn")$("mn").classList.add("hidden");guard(async()=>A[el.dataset.a](el.dataset.id,el.dataset.k))}});
+document.addEventListener("click",e=>{const el=e.target.closest("[data-a]");if(el&&A[el.dataset.a]){if(el.closest("#mn")&&el.dataset.a!=="mn")$("mn").classList.add("hidden");guard(async()=>A[el.dataset.a](el.dataset.id,el.dataset.k),el.dataset.a)}});
 document.addEventListener("change",async e=>{const t=e.target;
  if(t.dataset.uid)return guard(()=>updateDoc(doc(fs,"users",t.dataset.uid),{role:t.value}));
  const k=t.dataset.k;if(!k||!t.files)return;const f=t.files[0];if(!f)return;if(!f.type.startsWith("image/"))return say("اختر ملف صورة.");
