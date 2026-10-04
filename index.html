@@ -3,7 +3,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self';script-src 'self' https://www.gstatic.com https://www.google.com;style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;connect-src https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://www.google.com;frame-src https://tayid2.firebaseapp.com https://www.google.com https://recaptcha.google.com;object-src 'none';base-uri 'none';form-action 'none'">
 <meta name="referrer" content="no-referrer"><meta name="theme-color" content="#315743">
 <link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="style.css?v=10"><title>برنامج تأييد الحضور</title></head><body>
+<link rel="stylesheet" href="style.css?v=11"><title>برنامج تأييد الحضور</title></head><body>
 <div id="toast" class="hidden"></div>
 <div id="viewer" class="hidden"><div class="vb"><button class="b del" data-a="vx">✕ إغلاق</button><a class="b" id="vdl" style="text-decoration:none">⬇ تحميل</a><span id="vi"></span></div><img id="vimg" alt=""></div>
 
@@ -42,7 +42,7 @@
 <div class="tile" id="t_p" data-k="p">👤 الصورة الشخصية<input type="file" accept="image/*" data-k="p"></div>
 <div class="tile" id="t_f" data-k="f">🪪 الموحدة: الوجه الأمامي<input type="file" accept="image/*" data-k="f"></div>
 <div class="tile" id="t_b" data-k="b">🪪 الموحدة: الوجه الخلفي<input type="file" accept="image/*" data-k="b"></div></div>
-</div><div class="ac"><button class="b add" id="addB" data-a="add">＋ إضافة</button><button class="b edt hidden" id="edtB" data-a="edt">✎ حفظ التعديل</button><button class="b" data-a="clr">↺ تفريغ</button></div><div id="st" class="st"></div></section>
+</div><div class="ac"><button class="b add" id="addB" data-a="add">＋ إضافة</button><button class="b edt hidden" id="edtB" data-a="edt">✎ حفظ التعديل</button><button class="b" data-a="cam">📷 كاميرا</button><button class="b" data-a="clr">↺ تفريغ</button></div><div id="st" class="st"></div></section>
 
 <section class="cd"><h2>السجلات</h2><div class="stats"><div><b id="n0">0</b>الإجمالي</div><div><b id="n1">0</b>الشهداء</div><div><b id="n2">0</b>المصابون</div></div>
 <input type="search" id="q" placeholder="ابحث بالاسم أو المستفيد أو الموحدة…"><details class="fl2"><summary>🔎 فلاتر متقدمة</summary><div class="gr" style="margin-top:10px"><div><label for="fSt">الحالة</label><select id="fSt"><option value="">الكل</option><option>شهيد</option><option>شهيدة</option><option>مصاب</option><option>مصابه</option></select></div><div><label for="fDi">محل النفوس</label><select id="fDi"></select></div><div><label for="fPc">نسبة العجز</label><select id="fPc"></select></div><div style="align-self:end"><button class="b" data-a="fr" style="width:100%">↺ إعادة ضبط</button></div></div></details><div id="list" class="cards"></div></section>
@@ -70,6 +70,12 @@
 <small style="color:var(--mu)">الرمز لقفل الشاشة على هذا الجهاز فقط، وبعد 5 محاولات خاطئة يُسجَّل خروجك.</small></div></div>
 <div id="rp" class="hidden"><div class="mpw"><header class="mph"><button class="b" data-a="stx">→ رجوع</button><h2>📊 الإحصائيات والتقارير</h2></header><div class="tabs"><button class="tab on" data-a="tab" data-k="s">📊 الإحصائيات</button><button class="tab" data-a="tab" data-k="m">⚠ النواقص</button><button class="tab hidden" id="tbT" data-a="tab" data-k="t">🗑 المحذوفات</button></div><div id="stb"></div></div></div>
 <div id="lk" class="hidden"><div class="lkc"><div style="font-size:42px">🔒</div><h2>البرنامج مقفل</h2><div id="lkd" class="dots"></div><div id="lkm" class="st" style="color:#ffb4aa"></div><div class="pad"><button data-a="pd" data-k="1">1</button><button data-a="pd" data-k="2">2</button><button data-a="pd" data-k="3">3</button><button data-a="pd" data-k="4">4</button><button data-a="pd" data-k="5">5</button><button data-a="pd" data-k="6">6</button><button data-a="pd" data-k="7">7</button><button data-a="pd" data-k="8">8</button><button data-a="pd" data-k="9">9</button><span></span><button data-a="pd" data-k="0">0</button><button data-a="pd" data-k="clr" aria-label="حذف">⌫</button></div><button class="lnk2" data-a="out">نسيت الرمز؟ تسجيل الخروج</button></div></div>
+<div id="cm" class="sh hidden"><div class="sc"><div class="sg-h"><b>📷 التقاط صورة حيّة</b><button class="ib" data-a="cx" aria-label="إغلاق">✕</button></div>
+<div class="tabs"><button class="tab on" data-a="cs" data-k="p">👤 الشخصية</button><button class="tab" data-a="cs" data-k="f">🪪 الموحدة أمامي</button><button class="tab" data-a="cs" data-k="b">🪪 الموحدة خلفي</button></div>
+<div class="vw"><video id="cmv" autoplay playsinline muted></video></div>
+<div class="hidden"><label for="cmd">الكاميرا</label><select id="cmd"></select></div>
+<div id="cmm" class="st"></div>
+<div class="ac"><button class="b add" data-a="cc">⏺ التقاط</button><button class="b" data-a="cx">تم</button></div></div></div>
 <div id="pr"></div>
 <div id="pw" class="hidden"><div class="pwc"><h2>🔑 تغيير كلمة السر</h2><label for="pw0">كلمة السر الحالية</label><input type="password" id="pw0" autocomplete="current-password"><label for="pw1" style="margin-top:10px">الجديدة (8 أحرف على الأقل)</label><input type="password" id="pw1" autocomplete="new-password"><label for="pw2" style="margin-top:10px">تأكيد الجديدة</label><input type="password" id="pw2" autocomplete="new-password"><div id="pwm" class="st"></div><div class="ac"><button class="b add" data-a="pws">حفظ</button><button class="b" data-a="pwx">إلغاء</button></div></div></div>
-<script type="module" src="app.js?v=13"></script></body></html>
+<script type="module" src="app.js?v=14"></script></body></html>

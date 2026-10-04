@@ -149,6 +149,24 @@ async function sgSave(){const m=$("sgm"),p=$("sPn").value.trim(),L=$("sLk").valu
  try{localStorage.lockMin=L;localStorage.offm=$("sOff").checked?"1":"0"}catch{}
  m.style.color="#3e8a55";m.textContent="✓ تم الحفظ. وضع الإنترنت يسري بعد إعادة فتح البرنامج.";bumpIdle();setTimeout(()=>$("sg").classList.add("hidden"),1500)}
 const net=()=>{const on=navigator.onLine;$("dot").className="dot"+(on?" on":"");$("conn").textContent=on?"متصل ومتزامن":"بدون إنترنت — التغييرات تُحفظ على الجهاز وتُرسل عند الاتصال"};
+let cmS=null,cmK="p",cmD="";
+const CMN={p:"الشخصية",f:"الموحدة الأمامي",b:"الموحدة الخلفي"};
+function camStop(){if(cmS){cmS.getTracks().forEach(t=>t.stop());cmS=null}const v=$("cmv");if(v)v.srcObject=null}
+function csel(k){cmK=k;document.querySelectorAll("#cm .tab").forEach(b=>b.classList.toggle("on",b.dataset.k===k))}
+async function camStart(){camStop();const m=$("cmm");m.style.color="#c0574c";m.textContent="";
+ try{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw Error("المتصفح لا يدعم الكاميرا (يلزم اتصال آمن https).");
+  const v={width:{ideal:1920},height:{ideal:1080}};if(cmD)v.deviceId={exact:cmD};else v.facingMode={ideal:"environment"};
+  cmS=await navigator.mediaDevices.getUserMedia({video:v,audio:false});$("cmv").srcObject=cmS;
+  const ds=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
+  $("cmd").innerHTML=ds.map((d,i)=>`<option value="${esc(d.deviceId)}">${esc(d.label||"كاميرا "+(i+1))}</option>`).join("");
+  const cur=cmS.getVideoTracks()[0].getSettings().deviceId;if(cur)$("cmd").value=cur;$("cmd").parentElement.classList.toggle("hidden",ds.length<2)}
+ catch(e){m.textContent=e.name==="NotAllowedError"?"لم تسمح للبرنامج باستخدام الكاميرا. فعّل الإذن من إعدادات المتصفح ثم أعد المحاولة.":e.name==="NotFoundError"?"لا توجد كاميرا على هذا الجهاز.":e.name==="NotReadableError"?"الكاميرا مشغولة ببرنامج آخر.":(e.message||"تعذر تشغيل الكاميرا.")}}
+function camOpen(){$("cm").classList.remove("hidden");csel(cmK);camStart()}
+function camClose(){camStop();$("cm").classList.add("hidden")}
+async function camShot(){const v=$("cmv"),m=$("cmm");if(!cmS||!v.videoWidth){m.style.color="#c0574c";return m.textContent="انتظر حتى تظهر الصورة."}
+ const c=document.createElement("canvas");c.width=v.videoWidth;c.height=v.videoHeight;c.getContext("2d").drawImage(v,0,0);
+ const bl=await new Promise(r=>c.toBlob(r,"image/jpeg",.95)),k=cmK;m.style.color="#3e8a55";m.textContent="جارٍ معالجة الصورة…";
+ pend[k]=await shrink(bl,k==="p"?TP:TC,k==="p"?38e3:45e4);setTile(k,pend[k]);m.textContent="✓ تم التقاط: "+CMN[k];if(k!=="b")csel(k==="p"?"f":"b")}
 async function pws(){const o=$("pw0").value,n=$("pw1").value,c=$("pw2").value,m=$("pwm");m.style.color="#c0574c";
  if(n.length<8)return m.textContent="كلمة السر الجديدة 8 أحرف على الأقل.";if(n!==c)return m.textContent="كلمتا السر غير متطابقتين.";if(n===o)return m.textContent="اختر كلمة مختلفة عن الحالية.";
  try{const u=auth.currentUser;await reauthenticateWithCredential(u,EmailAuthProvider.credential(u.email,o));await updatePassword(u,n);["pw0","pw1","pw2"].forEach(i=>$(i).value="");m.style.color="#3e8a55";m.textContent="✓ تم تغيير كلمة السر.";setTimeout(()=>$("pw").classList.add("hidden"),1500)}catch(e){m.textContent=err(e)}}
@@ -230,7 +248,7 @@ const hsh=async(s,p)=>[...new Uint8Array(await crypto.subtle.digest("SHA-256",ne
 async function wipe(){try{await signOut(auth)}catch{}try{await terminate(fs);await clearIndexedDbPersistence(fs)}catch{}location.reload()}
 function bumpIdle(){lastAct=Date.now();clearTimeout(lockT);clearTimeout(outT);const l=lockMs();if(l&&hasPin()&&!locked)lockT=setTimeout(lock,l);outT=setTimeout(wipe,Math.max(12e5,l+6e5))}
 const dots=()=>{const o=pinO(),n=o?o.n:4;$("lkd").innerHTML=Array.from({length:n},(_,i)=>`<i class="${i<pn.length?"f":""}"></i>`).join("")};
-function lock(){if(locked||!hasPin())return;locked=true;pn="";dots();$("lkm").textContent="";$("lk").classList.remove("hidden");document.body.style.overflow="hidden"}
+function lock(){if(locked||!hasPin())return;locked=true;camStop();$("cm").classList.add("hidden");pn="";dots();$("lkm").textContent="";$("lk").classList.remove("hidden");document.body.style.overflow="hidden"}
 async function chkPin(){const o=pinO();if(o&&await hsh(o.s,pn)===o.h){locked=false;pn="";fails=0;$("lk").classList.add("hidden");document.body.style.overflow="";bumpIdle();return}
  pn="";dots();$("lkm").textContent="رمز غير صحيح.";if(++fails>=5)wipe()}
 async function pdk(k){if(k==="clr"){pn=pn.slice(0,-1);return dots()}const o=pinO();pn+=k;dots();if(o&&pn.length>=o.n)chkPin()}
@@ -263,7 +281,7 @@ async function login(){const n=val("lu"),p=$("lp").value,L=lockLeft();
 const A={
  eye:()=>{const p=$("lp");p.type=p.type==="password"?"text":"password"},setup:()=>setSetup(!setup),out:()=>wipe(),
  add:()=>save(),edt:()=>{if(!sel&&!selB)return say("اختر سجلًا أولًا.");return save()},clr:clear,vx:()=>$("viewer").classList.add("hidden"),
- v:(id,k)=>view(id,k),om:id=>openM(id),more:()=>{lim+=20;render()},mc:closeM,att:id=>att(id),pw:()=>$("pw").classList.remove("hidden"),pwx:()=>$("pw").classList.add("hidden"),pws:pws,csv:csv,bk:()=>bk(0),bkf:()=>bk(1),zip:zipx,mn:()=>$("mn").classList.remove("hidden"),mx:()=>$("mn").classList.add("hidden"),stp:repOpen,stx:repClose,tab:(id,k)=>repTab(k),gt:id=>{repClose();const r=recs.find(x=>x.id===id);if(r)isM(r.statusType)?openM(id):pick(id)},rst:(id,k)=>restoreT(id,k),pgr:(id,k)=>purge(id,k),sg:sgOpen,sgx:()=>$("sg").classList.add("hidden"),sgs:sgSave,sgd:()=>{try{localStorage.removeItem("pin");localStorage.lockMin="0"}catch{}$("sLk").value="0";$("sgm").style.color="#3e8a55";$("sgm").textContent="حُذف الرمز وعُطّل القفل."},pd:(id,k)=>pdk(k),im:()=>$("imf").click(),tpl:()=>dl("tayid-template.csv","\uFEFF"+[Object.values(HC),["شهيد","فلان الفلاني","","علان العلاني","الاب","123456789","البصرة","1990-01-31",today()]].map(r=>r.map(cs).join(",")).join("\r\n"),"text/csv;charset=utf-8"),ut:(id,k)=>updateDoc(doc(fs,"users",id),{off:k!=="1"}),pr:id=>printRec(id),prm:()=>printRec(mp),fr:()=>{["fSt","fDi","fPc"].forEach(i=>$(i).value="");lim=20;render()},rs:()=>$("rsf").click(),ap:()=>{$("ap").classList.remove("hidden");document.body.style.overflow="hidden"},apx:()=>{try{localStorage.ls=Date.now()}catch{}$("ap").classList.add("hidden");document.body.style.overflow="";renderAct()},da:id=>deleteDoc(doc(fs,"activity",id)),dall:async()=>{if(!ask("dall","اضغط مرة أخرى لحذف كل السجل."))return;const b=writeBatch(fs);acts.forEach(e=>b.delete(doc(fs,"activity",e.id)));await b.commit();say("تم حذف السجل.",1)},ntf:async()=>{if(!("Notification" in window))return say("المتصفح لا يدعم الإشعارات.");const p=await Notification.requestPermission();say(p==="granted"?"تم تفعيل إشعارات الجهاز.":"لم يُسمح بالإشعارات.",p==="granted")},ab:addBen,eb:editBen,rb:rmBen,pick:id=>pick(id),rm:id=>rm(id),nu:addUser,
+ v:(id,k)=>view(id,k),om:id=>openM(id),more:()=>{lim+=20;render()},mc:closeM,att:id=>att(id),pw:()=>$("pw").classList.remove("hidden"),pwx:()=>$("pw").classList.add("hidden"),pws:pws,csv:csv,bk:()=>bk(0),bkf:()=>bk(1),zip:zipx,cam:camOpen,cx:camClose,cs:(id,k)=>csel(k),cc:camShot,mn:()=>$("mn").classList.remove("hidden"),mx:()=>$("mn").classList.add("hidden"),stp:repOpen,stx:repClose,tab:(id,k)=>repTab(k),gt:id=>{repClose();const r=recs.find(x=>x.id===id);if(r)isM(r.statusType)?openM(id):pick(id)},rst:(id,k)=>restoreT(id,k),pgr:(id,k)=>purge(id,k),sg:sgOpen,sgx:()=>$("sg").classList.add("hidden"),sgs:sgSave,sgd:()=>{try{localStorage.removeItem("pin");localStorage.lockMin="0"}catch{}$("sLk").value="0";$("sgm").style.color="#3e8a55";$("sgm").textContent="حُذف الرمز وعُطّل القفل."},pd:(id,k)=>pdk(k),im:()=>$("imf").click(),tpl:()=>dl("tayid-template.csv","\uFEFF"+[Object.values(HC),["شهيد","فلان الفلاني","","علان العلاني","الاب","123456789","البصرة","1990-01-31",today()]].map(r=>r.map(cs).join(",")).join("\r\n"),"text/csv;charset=utf-8"),ut:(id,k)=>updateDoc(doc(fs,"users",id),{off:k!=="1"}),pr:id=>printRec(id),prm:()=>printRec(mp),fr:()=>{["fSt","fDi","fPc"].forEach(i=>$(i).value="");lim=20;render()},rs:()=>$("rsf").click(),ap:()=>{$("ap").classList.remove("hidden");document.body.style.overflow="hidden"},apx:()=>{try{localStorage.ls=Date.now()}catch{}$("ap").classList.add("hidden");document.body.style.overflow="";renderAct()},da:id=>deleteDoc(doc(fs,"activity",id)),dall:async()=>{if(!ask("dall","اضغط مرة أخرى لحذف كل السجل."))return;const b=writeBatch(fs);acts.forEach(e=>b.delete(doc(fs,"activity",e.id)));await b.commit();say("تم حذف السجل.",1)},ntf:async()=>{if(!("Notification" in window))return say("المتصفح لا يدعم الإشعارات.");const p=await Notification.requestPermission();say(p==="granted"?"تم تفعيل إشعارات الجهاز.":"لم يُسمح بالإشعارات.",p==="granted")},ab:addBen,eb:editBen,rb:rmBen,pick:id=>pick(id),rm:id=>rm(id),nu:addUser,
  du:async id=>{if(ask("u"+id,"اضغط «حذف» مرة أخرى لحذف المستخدم."))await deleteDoc(doc(fs,"users",id))},
  inst:async()=>{if(!dp)return;dp.prompt();await dp.userChoice;dp=null;$("ib").classList.add("hidden")}};
 let dp=null;
@@ -286,3 +304,4 @@ $("fPc").innerHTML='<option value="">الكل</option>'+Array.from({length:71},(
 $("unified").onblur=()=>{const v=$("unified").value.trim(),x=dupU(v);if(x&&v!==ou)say("⚠ رقم الموحدة مسجّل مسبقًا لـ «"+x.personName+"».")};
 $("imf").onchange=e=>{const f=e.target.files[0];e.target.value="";if(f)guard(()=>imp(f))};
 addEventListener("online",net);addEventListener("offline",net);
+$("cmd").onchange=()=>{cmD=$("cmd").value;camStart()};
