@@ -121,3 +121,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px;text-
 .lnk2{background:none;border:0;color:#8fd6b8;cursor:pointer;font-size:13px}
 
 #cm{z-index:90}.vw{background:#000;border-radius:16px;overflow:hidden;aspect-ratio:4/3}.vw video{width:100%;height:100%;object-fit:contain;display:block}
+
+#sn{z-index:90}
+
+.fa .add,.fa .edt{flex:1 1 100%}.fa .b:not(.add):not(.edt){flex:1 1 0;white-space:nowrap;padding:12px 8px}
