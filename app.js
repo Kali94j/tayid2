@@ -173,14 +173,22 @@ async function snPing(){const m=$("snm");m.style.color="#c0574c";m.textContent="
  try{const r=await fetch(SC+"/ping",{cache:"no-store"});if(!r.ok)throw 0;m.style.color="#3e8a55";m.textContent="✓ الاتصال جاهز. ضع المستند في السكنر ثم اضغط «مسح الآن»."}
  catch{m.textContent="البرنامج المساعد غير متصل. شغّل start-scanner.bat على الحاسوب (واترك نافذته مفتوحة) ثم اضغط «إعادة فحص الاتصال»."}}
 function snOpen(){$("sn").classList.remove("hidden");snSel(snK);snPing()}
-async function autoCrop(bl){const u=URL.createObjectURL(bl),i=await new Promise((ok,no)=>{const m=new Image();m.onload=()=>ok(m);m.onerror=()=>no(Error("صورة غير صالحة"));m.src=u});URL.revokeObjectURL(u);
- const s=Math.min(1,600/Math.max(i.width,i.height)),w=Math.round(i.width*s),h=Math.round(i.height*s),c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.drawImage(i,0,0,w,h);const d=x.getImageData(0,0,w,h).data;
- let x0=w,y0=h,x1=0,y1=0;for(let y=0;y<h;y++)for(let X=0;X<w;X++){const p=(y*w+X)*4;if((d[p]+d[p+1]+d[p+2])/3<225){if(X<x0)x0=X;if(X>x1)x1=X;if(y<y0)y0=y;if(y>y1)y1=y}}
- if(x1-x0<w*.1||y1-y0<h*.1)return bl;
- const pd=Math.round(8/s),sx=Math.max(0,Math.round(x0/s)-pd),sy=Math.max(0,Math.round(y0/s)-pd),sw=Math.min(i.width-sx,Math.round((x1-x0)/s)+2*pd),sh=Math.min(i.height-sy,Math.round((y1-y0)/s)+2*pd),o=document.createElement("canvas");o.width=sw;o.height=sh;o.getContext("2d").drawImage(i,sx,sy,sw,sh,0,0,sw,sh);
+function cropBox(d,w,h,T){const E=Math.max(2,Math.round(Math.min(w,h)*.02)),R=[],G=[],B=[],sp=(X,Y)=>{const p=(Y*w+X)*4;R.push(d[p]);G.push(d[p+1]);B.push(d[p+2])};
+ for(let X=0;X<w;X+=3)for(let k=0;k<E;k++){sp(X,k);sp(X,h-1-k)}for(let Y=0;Y<h;Y+=3)for(let k=0;k<E;k++){sp(k,Y);sp(w-1-k,Y)}
+ const md=a=>{a.sort((p,q)=>p-q);return a[a.length>>1]},br=md(R),bg=md(G),bb=md(B),rc=new Uint32Array(h),cc=new Uint32Array(w);
+ for(let Y=E;Y<h-E;Y++)for(let X=E;X<w-E;X++){const p=(Y*w+X)*4;if(Math.max(Math.abs(d[p]-br),Math.abs(d[p+1]-bg),Math.abs(d[p+2]-bb))>T){rc[Y]++;cc[X]++}}
+ const tr=Math.max(3,w*.02),tc=Math.max(3,h*.02);let x0=-1,x1=-1,y0=-1,y1=-1;
+ for(let Y=0;Y<h;Y++)if(rc[Y]>tr){if(y0<0)y0=Y;y1=Y}
+ for(let X=0;X<w;X++)if(cc[X]>tc){if(x0<0)x0=X;x1=X}
+ if(x0<0||y0<0)return null;const ar=(x1-x0+1)*(y1-y0+1);if(ar<w*h*.04||ar>w*h*.985)return null;
+ if(x0<=E+1)x0=0;if(y0<=E+1)y0=0;if(x1>=w-E-2)x1=w-1;if(y1>=h-E-2)y1=h-1;return[x0,y0,x1,y1]}
+async function autoCrop(bl,T){const u=URL.createObjectURL(bl),i=await new Promise((ok,no)=>{const m=new Image();m.onload=()=>ok(m);m.onerror=()=>no(Error("صورة غير صالحة"));m.src=u});URL.revokeObjectURL(u);
+ const s=Math.min(1,800/Math.max(i.width,i.height)),w=Math.round(i.width*s),h=Math.round(i.height*s),c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(i,0,0,w,h);
+ const bx=cropBox(x.getImageData(0,0,w,h).data,w,h,T);if(!bx)return bl;
+ const pd=Math.round(6/s),sx=Math.max(0,Math.round(bx[0]/s)-pd),sy=Math.max(0,Math.round(bx[1]/s)-pd),ex=Math.min(i.width,Math.round((bx[2]+1)/s)+pd),ey=Math.min(i.height,Math.round((bx[3]+1)/s)+pd),o=document.createElement("canvas");o.width=ex-sx;o.height=ey-sy;o.getContext("2d").drawImage(i,sx,sy,o.width,o.height,0,0,o.width,o.height);
  return new Promise(r=>o.toBlob(r,"image/jpeg",.95))}
 async function snScan(){const m=$("snm"),k=snK;m.style.color="#3e8a55";m.textContent="جارٍ المسح… قد تظهر نافذة الماسح على الحاسوب.";
- try{const r=await fetch(SC+"/scan?dpi="+$("snD").value+"&color="+$("snC").value);if(!r.ok)throw Error((await r.text())||"فشل المسح.");let bl=await r.blob();if($("snA").checked)bl=await autoCrop(bl);
+ try{const r=await fetch(SC+"/scan?dpi="+$("snD").value+"&color="+$("snC").value);if(!r.ok)throw Error((await r.text())||"فشل المسح.");let bl=await r.blob();const T=+$("snT").value;if(T>0)bl=await autoCrop(bl,T);
   pend[k]=await shrink(bl,k==="p"?TP:TC,k==="p"?38e3:45e4);setTile(k,pend[k]);m.textContent="✓ تم مسح: "+CMN[k]+(k==="f"?" — اقلب البطاقة وامسح الوجه الخلفي.":"");if(k==="f")snSel("b")}
  catch(e){m.style.color="#c0574c";m.textContent=e.name==="TypeError"?"تعذّر الاتصال بالبرنامج المساعد. شغّل start-scanner.bat ثم اضغط «إعادة فحص الاتصال».":(e.message||"فشل المسح.")}}
 async function pws(){const o=$("pw0").value,n=$("pw1").value,c=$("pw2").value,m=$("pwm");m.style.color="#c0574c";
