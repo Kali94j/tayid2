@@ -177,19 +177,24 @@ function cropBox(d,w,h,T){const E=Math.max(2,Math.round(Math.min(w,h)*.02)),R=[]
  for(let X=0;X<w;X+=3)for(let k=0;k<E;k++){sp(X,k);sp(X,h-1-k)}for(let Y=0;Y<h;Y+=3)for(let k=0;k<E;k++){sp(k,Y);sp(w-1-k,Y)}
  const md=a=>{a.sort((p,q)=>p-q);return a[a.length>>1]},br=md(R),bg=md(G),bb=md(B),rc=new Uint32Array(h),cc=new Uint32Array(w);
  for(let Y=E;Y<h-E;Y++)for(let X=E;X<w-E;X++){const p=(Y*w+X)*4;if(Math.max(Math.abs(d[p]-br),Math.abs(d[p+1]-bg),Math.abs(d[p+2]-bb))>T){rc[Y]++;cc[X]++}}
- const tr=Math.max(3,w*.02),tc=Math.max(3,h*.02);let x0=-1,x1=-1,y0=-1,y1=-1;
+ const tr=Math.max(2,w*.006),tc=Math.max(2,h*.006);let x0=-1,x1=-1,y0=-1,y1=-1;
  for(let Y=0;Y<h;Y++)if(rc[Y]>tr){if(y0<0)y0=Y;y1=Y}
  for(let X=0;X<w;X++)if(cc[X]>tc){if(x0<0)x0=X;x1=X}
  if(x0<0||y0<0)return null;const ar=(x1-x0+1)*(y1-y0+1);if(ar<w*h*.04||ar>w*h*.985)return null;
- if(x0<=E+1)x0=0;if(y0<=E+1)y0=0;if(x1>=w-E-2)x1=w-1;if(y1>=h-E-2)y1=h-1;return[x0,y0,x1,y1]}
+ if(x0<=E+1)x0=0;if(y0<=E+1)y0=0;if(x1>=w-E-2)x1=w-1;if(y1>=h-E-2)y1=h-1;
+ const L=(X,Y)=>{const p=(Y*w+X)*4;return(d[p]+d[p+1]+d[p+2])/3},cl=X=>{let s=0,n=0;for(let Y=y0;Y<=y1;Y+=2){s+=L(X,Y);n++}return s/n},rl=Y=>{let s=0,n=0;for(let X=x0;X<=x1;X+=2){s+=L(X,Y);n++}return s/n};
+ const ox0=x0,ox1=x1,oy0=y0,oy1=y1;
+ while(x0<x1-10&&cl(x0)<75)x0++;while(x1>x0+10&&cl(x1)<75)x1--;while(y0<y1-10&&rl(y0)<75)y0++;while(y1>y0+10&&rl(y1)<75)y1--;
+ if(x0-ox0>(ox1-ox0)*.4)x0=ox0;if(ox1-x1>(ox1-ox0)*.4)x1=ox1;if(y0-oy0>(oy1-oy0)*.4)y0=oy0;if(oy1-y1>(oy1-oy0)*.4)y1=oy1;
+ return[x0,y0,x1,y1]}
 async function autoCrop(bl,T){const u=URL.createObjectURL(bl),i=await new Promise((ok,no)=>{const m=new Image();m.onload=()=>ok(m);m.onerror=()=>no(Error("صورة غير صالحة"));m.src=u});URL.revokeObjectURL(u);
  const s=Math.min(1,800/Math.max(i.width,i.height)),w=Math.round(i.width*s),h=Math.round(i.height*s),c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(i,0,0,w,h);
  const bx=cropBox(x.getImageData(0,0,w,h).data,w,h,T);if(!bx)return bl;
- const pd=Math.round(6/s),sx=Math.max(0,Math.round(bx[0]/s)-pd),sy=Math.max(0,Math.round(bx[1]/s)-pd),ex=Math.min(i.width,Math.round((bx[2]+1)/s)+pd),ey=Math.min(i.height,Math.round((bx[3]+1)/s)+pd),o=document.createElement("canvas");o.width=ex-sx;o.height=ey-sy;o.getContext("2d").drawImage(i,sx,sy,o.width,o.height,0,0,o.width,o.height);
+ const pd=Math.round(.012*Math.max(i.width,i.height)),sx=Math.max(0,Math.round(bx[0]/s)-pd),sy=Math.max(0,Math.round(bx[1]/s)-pd),ex=Math.min(i.width,Math.round((bx[2]+1)/s)+pd),ey=Math.min(i.height,Math.round((bx[3]+1)/s)+pd),o=document.createElement("canvas");o.width=ex-sx;o.height=ey-sy;o.getContext("2d").drawImage(i,sx,sy,o.width,o.height,0,0,o.width,o.height);
  return new Promise(r=>o.toBlob(r,"image/jpeg",.95))}
 async function snScan(){const m=$("snm"),k=snK;m.style.color="#3e8a55";m.textContent="جارٍ المسح… قد تظهر نافذة الماسح على الحاسوب.";
- try{const r=await fetch(SC+"/scan?dpi="+$("snD").value+"&color="+$("snC").value);if(!r.ok)throw Error((await r.text())||"فشل المسح.");let bl=await r.blob();const T=+$("snT").value;if(T>0)bl=await autoCrop(bl,T);
-  pend[k]=await shrink(bl,k==="p"?TP:TC,k==="p"?38e3:45e4);setTile(k,pend[k]);m.textContent="✓ تم مسح: "+CMN[k]+(k==="f"?" — اقلب البطاقة وامسح الوجه الخلفي.":"");if(k==="f")snSel("b")}
+ try{const r=await fetch(SC+"/scan?dpi="+$("snD").value+"&color="+$("snC").value+"&area="+$("snR").value+"&ui="+$("snU").value);const inf=r.headers.get("X-Scan-Info")||"";if(!r.ok)throw Error((await r.text())||"فشل المسح.");let bl=await r.blob();const T=+$("snT").value;if(T>0)bl=await autoCrop(bl,T);
+  pend[k]=await shrink(bl,k==="p"?TP:TC,k==="p"?38e3:45e4);setTile(k,pend[k]);const mm=inf.match(/got=(\d+)x(\d+);want=(\d+)x(\d+)/);let ex="";if(mm){const gw=+mm[1],gh=+mm[2],ww=+mm[3],wh=+mm[4];ex=" — المقاس الخام "+gw+"×"+gh;if(ww&&wh&&(gw<ww*.9||gh<wh*.9)){ex+=" ⚠ أصغر من المطلوب ("+ww+"×"+wh+")، جرّب «عبر نافذة ويندوز».";m.style.color="#c9a24d"}}m.textContent="✓ تم مسح: "+CMN[k]+ex+(k==="f"?" — اقلب البطاقة وامسح الوجه الخلفي.":"");if(k==="f")snSel("b")}
  catch(e){m.style.color="#c0574c";m.textContent=e.name==="TypeError"?"تعذّر الاتصال بالبرنامج المساعد. شغّل start-scanner.bat ثم اضغط «إعادة فحص الاتصال».":(e.message||"فشل المسح.")}}
 async function pws(){const o=$("pw0").value,n=$("pw1").value,c=$("pw2").value,m=$("pwm");m.style.color="#c0574c";
  if(n.length<8)return m.textContent="كلمة السر الجديدة 8 أحرف على الأقل.";if(n!==c)return m.textContent="كلمتا السر غير متطابقتين.";if(n===o)return m.textContent="اختر كلمة مختلفة عن الحالية.";
