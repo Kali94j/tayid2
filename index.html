@@ -1,9 +1,9 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self';script-src 'self' https://www.gstatic.com https://www.google.com;style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;connect-src https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://www.google.com http://localhost:8765;frame-src https://tayid2.firebaseapp.com https://www.google.com https://recaptcha.google.com;object-src 'none';base-uri 'none';form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self';script-src 'self' 'wasm-unsafe-eval' https://www.gstatic.com https://www.google.com;style-src 'self' 'unsafe-inline';img-src 'self' data: blob:;connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://www.google.com http://localhost:8765;frame-src https://tayid2.firebaseapp.com https://www.google.com https://recaptcha.google.com;worker-src 'self';object-src 'none';base-uri 'none';form-action 'none'">
 <meta name="referrer" content="no-referrer"><meta name="theme-color" content="#315743">
 <link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="style.css?v=13"><title>برنامج تأييد الحضور</title></head><body>
+<link rel="stylesheet" href="style.css?v=14"><title>برنامج تأييد الحضور</title></head><body>
 <div id="toast" class="hidden"></div>
 <div id="viewer" class="hidden"><div class="vb"><button class="b del" data-a="vx">✕ إغلاق</button><a class="b" id="vdl" style="text-decoration:none">⬇ تحميل</a><span id="vi"></span></div><img id="vimg" alt=""></div>
 
@@ -42,7 +42,7 @@
 <div class="tile" id="t_p" data-k="p">👤 الصورة الشخصية<input type="file" accept="image/*" data-k="p"></div>
 <div class="tile" id="t_f" data-k="f">🪪 الموحدة: الوجه الأمامي<input type="file" accept="image/*" data-k="f"></div>
 <div class="tile" id="t_b" data-k="b">🪪 الموحدة: الوجه الخلفي<input type="file" accept="image/*" data-k="b"></div></div>
-</div><div class="ac fa"><button class="b add" id="addB" data-a="add">＋ إضافة</button><button class="b edt hidden" id="edtB" data-a="edt">✎ حفظ التعديل</button><button class="b" data-a="cam">📷 كاميرا</button><button class="b" id="snB" data-a="sn">🖨 سكنر</button><button class="b" data-a="clr">↺ تفريغ</button></div><div id="st" class="st"></div></section>
+<label class="ck" style="margin-top:10px"><input type="checkbox" id="ocrOn" checked> قراءة الاسم ورقم الموحدة (الوجه الأمامي) وتاريخ الميلاد (الوجه الخلفي) تلقائيًا</label><div class="ac" style="margin:6px 0 0"><button class="b" data-a="ocr">🔎 قراءة البطاقة الآن</button></div><div id="ocrm" class="st"></div></div><div class="ac fa"><button class="b add" id="addB" data-a="add">＋ إضافة</button><button class="b edt hidden" id="edtB" data-a="edt">✎ حفظ التعديل</button><button class="b" data-a="cam">📷 كاميرا</button><button class="b" id="snB" data-a="sn">🖨 سكنر</button><button class="b" data-a="clr">↺ تفريغ</button></div><div id="st" class="st"></div></section>
 
 <section class="cd"><h2>السجلات</h2><div class="stats"><div><b id="n0">0</b>الإجمالي</div><div><b id="n1">0</b>الشهداء</div><div><b id="n2">0</b>المصابون</div></div>
 <input type="search" id="q" placeholder="ابحث بالاسم أو المستفيد أو الموحدة…"><details class="fl2"><summary>🔎 فلاتر متقدمة</summary><div class="gr" style="margin-top:10px"><div><label for="fSt">الحالة</label><select id="fSt"><option value="">الكل</option><option>شهيد</option><option>شهيدة</option><option>مصاب</option><option>مصابه</option></select></div><div><label for="fDi">محل النفوس</label><select id="fDi"></select></div><div><label for="fPc">نسبة العجز</label><select id="fPc"></select></div><div style="align-self:end"><button class="b" data-a="fr" style="width:100%">↺ إعادة ضبط</button></div></div></details><div id="list" class="cards"></div></section>
@@ -90,4 +90,4 @@
 <small style="color:var(--mu)">ضع البطاقة وجهها للأسفل داخل الزجاج كاملة (لا فوق الإطار الأسود) وأغلق الغطاء. يحتاج برنامجًا صغيرًا على الحاسوب المتصل بالسكنر: start-scanner.bat.</small></div></div>
 <div id="pr"></div>
 <div id="pw" class="hidden"><div class="pwc"><h2>🔑 تغيير كلمة السر</h2><label for="pw0">كلمة السر الحالية</label><input type="password" id="pw0" autocomplete="current-password"><label for="pw1" style="margin-top:10px">الجديدة (8 أحرف على الأقل)</label><input type="password" id="pw1" autocomplete="new-password"><label for="pw2" style="margin-top:10px">تأكيد الجديدة</label><input type="password" id="pw2" autocomplete="new-password"><div id="pwm" class="st"></div><div class="ac"><button class="b add" data-a="pws">حفظ</button><button class="b" data-a="pwx">إلغاء</button></div></div></div>
-<script type="module" src="app.js?v=17"></script></body></html>
+<script type="module" src="app.js?v=18"></script></body></html>

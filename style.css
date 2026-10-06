@@ -125,3 +125,5 @@ table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px;text-
 #sn{z-index:90}
 
 .fa .add,.fa .edt{flex:1 1 100%}.fa .b:not(.add):not(.edt){flex:1 1 0;white-space:nowrap;padding:12px 8px}
+
+.ocr{border-color:#c9a24d!important;background:rgba(201,162,77,.14)!important}

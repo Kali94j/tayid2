@@ -166,7 +166,7 @@ function camClose(){camStop();$("cm").classList.add("hidden")}
 async function camShot(){const v=$("cmv"),m=$("cmm");if(!cmS||!v.videoWidth){m.style.color="#c0574c";return m.textContent="انتظر حتى تظهر الصورة."}
  const c=document.createElement("canvas");c.width=v.videoWidth;c.height=v.videoHeight;c.getContext("2d").drawImage(v,0,0);
  const bl=await new Promise(r=>c.toBlob(r,"image/jpeg",.95)),k=cmK;m.style.color="#3e8a55";m.textContent="جارٍ معالجة الصورة…";
- pend[k]=await shrink(bl,k==="p"?TP:TC,k==="p"?38e3:45e4);setTile(k,pend[k]);m.textContent="✓ تم التقاط: "+CMN[k];if(k!=="b")csel(k==="p"?"f":"b")}
+ pend[k]=await shrink(bl,k==="p"?TP:TC,k==="p"?38e3:45e4);setTile(k,pend[k]);onImg(k);m.textContent="✓ تم التقاط: "+CMN[k];if(k!=="b")csel(k==="p"?"f":"b")}
 const SC="http://localhost:8765";let snK="f";
 function snSel(k){snK=k;document.querySelectorAll("#sn .tab").forEach(b=>b.classList.toggle("on",b.dataset.k===k))}
 async function snPing(){const m=$("snm");m.style.color="#c0574c";m.textContent="جارٍ فحص الاتصال بالسكنر…";
@@ -194,8 +194,53 @@ async function autoCrop(bl,T){const u=URL.createObjectURL(bl),i=await new Promis
  return new Promise(r=>o.toBlob(r,"image/jpeg",.95))}
 async function snScan(){const m=$("snm"),k=snK;m.style.color="#3e8a55";m.textContent="جارٍ المسح… قد تظهر نافذة الماسح على الحاسوب.";
  try{const r=await fetch(SC+"/scan?dpi="+$("snD").value+"&color="+$("snC").value+"&area="+$("snR").value+"&ui="+$("snU").value);const inf=r.headers.get("X-Scan-Info")||"";if(!r.ok)throw Error((await r.text())||"فشل المسح.");let bl=await r.blob();const T=+$("snT").value;if(T>0)bl=await autoCrop(bl,T);
-  pend[k]=await shrink(bl,k==="p"?TP:TC,k==="p"?38e3:45e4);setTile(k,pend[k]);const mm=inf.match(/got=(\d+)x(\d+);want=(\d+)x(\d+)/);let ex="";if(mm){const gw=+mm[1],gh=+mm[2],ww=+mm[3],wh=+mm[4];ex=" — المقاس الخام "+gw+"×"+gh;if(ww&&wh&&(gw<ww*.9||gh<wh*.9)){ex+=" ⚠ أصغر من المطلوب ("+ww+"×"+wh+")، جرّب «عبر نافذة ويندوز».";m.style.color="#c9a24d"}}m.textContent="✓ تم مسح: "+CMN[k]+ex+(k==="f"?" — اقلب البطاقة وامسح الوجه الخلفي.":"");if(k==="f")snSel("b")}
+  pend[k]=await shrink(bl,k==="p"?TP:TC,k==="p"?38e3:45e4);setTile(k,pend[k]);onImg(k);const mm=inf.match(/got=(\d+)x(\d+);want=(\d+)x(\d+)/);let ex="";if(mm){const gw=+mm[1],gh=+mm[2],ww=+mm[3],wh=+mm[4];ex=" — المقاس الخام "+gw+"×"+gh;if(ww&&wh&&(gw<ww*.9||gh<wh*.9)){ex+=" ⚠ أصغر من المطلوب ("+ww+"×"+wh+")، جرّب «عبر نافذة ويندوز».";m.style.color="#c9a24d"}}m.textContent="✓ تم مسح: "+CMN[k]+ex+(k==="f"?" — اقلب البطاقة وامسح الوجه الخلفي.":"");if(k==="f")snSel("b")}
  catch(e){m.style.color="#c0574c";m.textContent=e.name==="TypeError"?"تعذّر الاتصال بالبرنامج المساعد. شغّل start-scanner.bat ثم اضغط «إعادة فحص الاتصال».":(e.message||"فشل المسح.")}}
+/* ===== القراءة الآلية للموحدة (تعمل داخل المتصفح ولا ترسل الصور لأي جهة) ===== */
+const AD=s=>String(s).replace(/[٠-٩]/g,c=>c.charCodeAt(0)-1632).replace(/[۰-۹]/g,c=>c.charCodeAt(0)-1776);
+const KMAP={"ک":"ك","ی":"ي","پ":"ب","گ":"ك","چ":"ج","ڤ":"ف","ە":"ه","ۆ":"و","ێ":"ي","ڕ":"ر","ڵ":"ل","ہ":"ه","ھ":"ه","ۇ":"و"};
+const NR=s=>String(s).replace(/[کیپگچڤەۆێڕڵہھۇ]/g,c=>KMAP[c]).replace(/[\u064B-\u065F\u0640]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/[^\u0621-\u064A]/g,"");
+const KU=new Set(["ناو","باوک","باپیر","نازناو","دایک","ڕەگەز","ناوی","باب"].map(NR));
+function pickNid(texts){const c={};for(const t of texts)for(const m of AD(t).matchAll(/\d{12,}/g)){const s=m[0];if(s.length===12)c[s]=(c[s]||0)+1;else{const p=s.slice(0,12),q=s.slice(-12);c[p]=(c[p]||0)+.4;c[q]=(c[q]||0)+.4}}
+ const e=Object.entries(c).sort((x,y)=>y[1]-x[1]);return e.length?e[0][0]:""}
+function parseDates(texts){const S=new Set(),yr=new Date().getFullYear();for(const t of texts)for(const m of AD(t).matchAll(/(19\d{2}|20\d{2})\s*[\/\-.]\s*(\d{1,2})\s*[\/\-.1]\s*(\d{1,2})/g)){const y=+m[1],mo=+m[2],d=+m[3];if(mo>=1&&mo<=12&&d>=1&&d<=31&&y<=yr+15)S.add(y+"-"+String(mo).padStart(2,"0")+"-"+String(d).padStart(2,"0"))}return[...S].sort()}
+function parseMrz(texts){const yy0=new Date().getFullYear()%100,fx=s=>s.replace(/O/g,"0").replace(/[IL]/g,"1").replace(/S/g,"5").replace(/B/g,"8").replace(/Z/g,"2"),ck=(s,c)=>{const w=[7,3,1];let t=0;for(let i=0;i<s.length;i++)t+=(+s[i])*w[i%3];return t%10===+c};
+ for(const t of texts)for(const ln of String(t).toUpperCase().split("\n")){const m=ln.replace(/\s/g,"").match(/([0-9OILSBZ]{6})([0-9OILSBZ])([MFK<])([0-9OILSBZ]{6})([0-9OILSBZ])[I1L]{1,2}RQ/);if(!m)continue;const b=fx(m[1]),yy=+b.slice(0,2),mm=+b.slice(2,4),dd=+b.slice(4,6);if(mm<1||mm>12||dd<1||dd>31)continue;return{date:(yy>yy0?1900+yy:2000+yy)+"-"+b.slice(2,4)+"-"+b.slice(4,6),ok:ck(b,fx(m[2]))}}return null}
+function chooseDob(dates,mrz){if(mrz){if(dates.includes(mrz.date))return{d:mrz.date,s:"تطابق مع الشريط السفلي"};if(mrz.ok)return{d:mrz.date,s:"من الشريط السفلي"}}
+ if(dates.length>=3)return{d:dates[0],s:"أقدم تاريخ على البطاقة"};
+ if(dates.length===2){const dy=(new Date(dates[1])-new Date(dates[0]))/31557600000;if(dy>9&&dy<11)return null;return{d:dates[0],s:"أقدم تاريخ"}}return null}
+function tsvWords(t){return String(t||"").split("\n").map(l=>l.split("\t")).filter(c=>c.length>=12&&c[0]==="5"&&c.slice(11).join("").trim()).map(c=>({l:+c[6],t:+c[7],w:+c[8],h:+c[9],s:c.slice(11).join("\t").trim()}))}
+function findNames(W){const L={n:"الاسم",f:"الاب",g:"الجد"},v={};
+ for(const k in L){const lb=W.filter(w=>NR(w.s)===L[k]).sort((p,q)=>p.t-q.t)[0];if(!lb)continue;const cy=lb.t+lb.h/2;
+  const c=W.filter(w=>w!==lb&&w.l+w.w<=lb.l+lb.w*.3&&Math.abs(w.t+w.h/2-cy)<lb.h*.75).sort((p,q)=>q.l-p.l),r=[];
+  for(const w of c){const n=NR(w.s);if(n.length<2||KU.has(n))continue;if(r.length&&r[r.length-1].l-(w.l+w.w)>r[r.length-1].h*1.3)break;r.push(w);if(r.length>=2)break}
+  if(r.length)v[k]=r.map(w=>NR(w.s)).join(" ")}
+ return["n","f","g"].map(k=>v[k]).filter(Boolean).join(" ")}
+let OCRE=null,OCRA=null,OCRB=0,OCRQ=[];
+const ocrU=p=>new URL(p,location.href).href;
+async function ocrW(lang){if(!window.Tesseract)await new Promise((ok,no)=>{const s=document.createElement("script");s.src="ocr/tesseract.min.js";s.onload=ok;s.onerror=()=>no(Error("ملفات القراءة الآلية غير موجودة في مجلد ocr. شغّل download-ocr.bat على الحاسوب ثم ارفع مجلد ocr إلى GitHub."));document.head.appendChild(s)});
+ return Tesseract.createWorker(lang,1,{workerPath:ocrU("ocr/worker.min.js"),corePath:ocrU("ocr"),langPath:ocrU("ocr/lang"),gzip:false,workerBlobURL:false})}
+async function ocrPrep(src){const i=await new Promise((ok,no)=>{const m=new Image();m.onload=()=>ok(m);m.onerror=()=>no(Error("صورة غير صالحة"));m.src=src}),s0=Math.max(1,Math.min(2.5,1500/Math.max(i.width,i.height)));
+ let c=document.createElement("canvas");c.width=Math.round(i.width*s0);c.height=Math.round(i.height*s0);let x=c.getContext("2d",{willReadFrequently:true});x.drawImage(i,0,0,c.width,c.height);let d=x.getImageData(0,0,c.width,c.height);
+ const bx=cropBox(d.data,c.width,c.height,24);if(bx){const o=document.createElement("canvas");o.width=bx[2]-bx[0]+1;o.height=bx[3]-bx[1]+1;o.getContext("2d").drawImage(c,bx[0],bx[1],o.width,o.height,0,0,o.width,o.height);c=o;x=c.getContext("2d",{willReadFrequently:true});d=x.getImageData(0,0,c.width,c.height)}
+ const p=d.data;let lo=255,hi=0;for(let j=0;j<p.length;j+=4){const g=p[j]*.3+p[j+1]*.59+p[j+2]*.11;p[j]=p[j+1]=p[j+2]=g;if(g<lo)lo=g;if(g>hi)hi=g}const k=hi>lo?255/(hi-lo):1;for(let j=0;j<p.length;j+=4){const v=(p[j]-lo)*k;p[j]=p[j+1]=p[j+2]=v}x.putImageData(d,0,0);return c}
+async function ocrPass(w,cv,rois,par){await w.setParameters(par);const out=[];for(const r of rois){const o=r?{rectangle:{left:Math.round(r[0]*cv.width),top:Math.round(r[1]*cv.height),width:Math.round(r[2]*cv.width),height:Math.round(r[3]*cv.height)}}:{};const{data}=await w.recognize(cv,o,{text:true,tsv:true});out.push(data)}return out}
+const DG={tessedit_char_whitelist:"0123456789",tessedit_pageseg_mode:"6"},DT={tessedit_char_whitelist:"0123456789/-.",tessedit_pageseg_mode:"6"},MZ={tessedit_char_whitelist:"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<",tessedit_pageseg_mode:"6"},NM={tessedit_char_whitelist:"",tessedit_pageseg_mode:"11"};
+function ocrSet(id,v){const el=$(id);if(el.value&&!el.classList.contains("ocr"))return false;el.value=v;el.classList.add("ocr");return true}
+async function ocrRun(k){if(OCRB){OCRQ.push(k);return}const src=pend[k],m=$("ocrm");if(!src)return;OCRB=1;m.style.color="#3e8a55";m.textContent="🔎 جارٍ قراءة البطاقة… قد يستغرق أول مرة نصف دقيقة.";
+ try{const cv=await ocrPrep(src);OCRE=OCRE||await ocrW("eng");const msg=[];
+  if(k==="f"){const t=(await ocrPass(OCRE,cv,[[.15,.05,.7,.3],[.15,.15,.7,.3],[.15,.25,.7,.3],[.15,.35,.7,.3]],DG)).map(d=>d.text),id=pickNid(t);let nm="",ne="";
+   try{OCRA=OCRA||await ocrW("ara");nm=findNames(tsvWords((await ocrPass(OCRA,cv,[null],NM))[0].tsv))}catch(e){ne=e.message}
+   if(id&&ocrSet("unified",id)){msg.push("الرقم "+id);const x=dupU(id);if(x)msg.push("⚠ الرقم مسجّل لـ «"+x.personName+"»")}else if(!id)msg.push("تعذّر قراءة رقم الموحدة");
+   if(nm&&ocrSet("beneficiary",nm))msg.push("الاسم «"+nm+"»");else if(!nm)msg.push("تعذّر قراءة الاسم"+(ne?" ("+ne+")":""))}
+  else{const ds=[];for(const y of[.1,.2,.3,.4,.5])ds.push(...(await ocrPass(OCRE,cv,[[0,y,1,.3]],DT)).map(d=>d.text));
+   const mz=(await ocrPass(OCRE,cv,[[0,.55,1,.45],[0,.65,1,.35]],MZ)).map(d=>d.text),r=chooseDob(parseDates(ds),parseMrz(mz));
+   if(r&&ocrSet("birthDate",r.d))msg.push("تاريخ الميلاد "+r.d+" ("+r.s+")");else if(!r)msg.push("تعذّر قراءة تاريخ الميلاد")}
+  m.style.color=msg.some(x=>x.startsWith("تعذّر")||x.startsWith("⚠"))?"#c9a24d":"#3e8a55";m.textContent="🔎 "+msg.join(" — ")+". راجع الحقول المظللة قبل الحفظ."}
+ catch(e){m.style.color="#c0574c";m.textContent=e.message||"تعذرت القراءة الآلية."}
+ finally{OCRB=0;if(OCRQ.length)ocrRun(OCRQ.shift())}}
+const onImg=k=>{if((k==="f"||k==="b")&&$("ocrOn").checked)ocrRun(k)};
+["unified","beneficiary","birthDate"].forEach(i=>$(i).addEventListener("input",()=>$(i).classList.remove("ocr")));
 async function pws(){const o=$("pw0").value,n=$("pw1").value,c=$("pw2").value,m=$("pwm");m.style.color="#c0574c";
  if(n.length<8)return m.textContent="كلمة السر الجديدة 8 أحرف على الأقل.";if(n!==c)return m.textContent="كلمتا السر غير متطابقتين.";if(n===o)return m.textContent="اختر كلمة مختلفة عن الحالية.";
  try{const u=auth.currentUser;await reauthenticateWithCredential(u,EmailAuthProvider.credential(u.email,o));await updatePassword(u,n);["pw0","pw1","pw2"].forEach(i=>$(i).value="");m.style.color="#3e8a55";m.textContent="✓ تم تغيير كلمة السر.";setTimeout(()=>$("pw").classList.add("hidden"),1500)}catch(e){m.textContent=err(e)}}
@@ -211,7 +256,7 @@ const isM=s=>s==="شهيد"||s==="شهيدة",isI=s=>s==="مصاب"||s==="مصا
 function layout(){const st=$("statusType").value,rr=sel?recs.find(x=>x.id===sel):null;
  $("pctW").classList.toggle("hidden",!isI(st));$("sBen").classList.toggle("hidden",!!rr&&isM(st)&&!rr.beneficiary);
  $("personName").disabled=$("statusType").disabled=!!tgt}
-function clear(){[...RF,...BF,"pct"].forEach(k=>{$(k).value="";$(k).classList.remove("bad")});pend={};sel=selB=tgt=null;ou="";ob=null;["p","f","b"].forEach(k=>setTile(k));$("addB").classList.remove("hidden");$("edtB").classList.add("hidden");$("ft").textContent="إضافة سجل جديد";layout();render()}
+function clear(){[...RF,...BF,"pct"].forEach(k=>{$(k).value="";$(k).classList.remove("bad","ocr")});pend={};sel=selB=tgt=null;ou="";ob=null;["p","f","b"].forEach(k=>setTile(k));$("addB").classList.remove("hidden");$("edtB").classList.add("hidden");$("ft").textContent="إضافة سجل جديد";layout();render()}
 function putImgs(b,id,o){for(const k of["f","b"])if(pend[k]){o["h"+k]=true;b.set(doc(fs,"images",id+"_"+k),{rid:id,d:pend[k]});IC.delete(id+"_"+k)}if(pend.p)o.photo=pend.p}
 async function save(){
  const st=val("statusType"),m=isM(st),inj=isI(st),rr=sel?recs.find(x=>x.id===sel):null,flat=rr?(!m||!!rr.beneficiary):true;
@@ -310,7 +355,7 @@ async function login(){const n=val("lu"),p=$("lp").value,L=lockLeft();
 const A={
  eye:()=>{const p=$("lp");p.type=p.type==="password"?"text":"password"},setup:()=>setSetup(!setup),out:()=>wipe(),
  add:()=>save(),edt:()=>{if(!sel&&!selB)return say("اختر سجلًا أولًا.");return save()},clr:clear,vx:()=>$("viewer").classList.add("hidden"),
- v:(id,k)=>view(id,k),om:id=>openM(id),more:()=>{lim+=20;render()},mc:closeM,att:id=>att(id),pw:()=>$("pw").classList.remove("hidden"),pwx:()=>$("pw").classList.add("hidden"),pws:pws,csv:csv,bk:()=>bk(0),bkf:()=>bk(1),zip:zipx,cam:camOpen,sn:snOpen,snx:()=>$("sn").classList.add("hidden"),ss:(id,k)=>snSel(k),sc:snScan,snp:snPing,cx:camClose,cs:(id,k)=>csel(k),cc:camShot,mn:()=>$("mn").classList.remove("hidden"),mx:()=>$("mn").classList.add("hidden"),stp:repOpen,stx:repClose,tab:(id,k)=>repTab(k),gt:id=>{repClose();const r=recs.find(x=>x.id===id);if(r)isM(r.statusType)?openM(id):pick(id)},rst:(id,k)=>restoreT(id,k),pgr:(id,k)=>purge(id,k),sg:sgOpen,sgx:()=>$("sg").classList.add("hidden"),sgs:sgSave,sgd:()=>{try{localStorage.removeItem("pin");localStorage.lockMin="0"}catch{}$("sLk").value="0";$("sgm").style.color="#3e8a55";$("sgm").textContent="حُذف الرمز وعُطّل القفل."},pd:(id,k)=>pdk(k),im:()=>$("imf").click(),tpl:()=>dl("tayid-template.csv","\uFEFF"+[Object.values(HC),["شهيد","فلان الفلاني","","علان العلاني","الاب","123456789","البصرة","1990-01-31",today()]].map(r=>r.map(cs).join(",")).join("\r\n"),"text/csv;charset=utf-8"),ut:(id,k)=>updateDoc(doc(fs,"users",id),{off:k!=="1"}),pr:id=>printRec(id),prm:()=>printRec(mp),fr:()=>{["fSt","fDi","fPc"].forEach(i=>$(i).value="");lim=20;render()},rs:()=>$("rsf").click(),ap:()=>{$("ap").classList.remove("hidden");document.body.style.overflow="hidden"},apx:()=>{try{localStorage.ls=Date.now()}catch{}$("ap").classList.add("hidden");document.body.style.overflow="";renderAct()},da:id=>deleteDoc(doc(fs,"activity",id)),dall:async()=>{if(!ask("dall","اضغط مرة أخرى لحذف كل السجل."))return;const b=writeBatch(fs);acts.forEach(e=>b.delete(doc(fs,"activity",e.id)));await b.commit();say("تم حذف السجل.",1)},ntf:async()=>{if(!("Notification" in window))return say("المتصفح لا يدعم الإشعارات.");const p=await Notification.requestPermission();say(p==="granted"?"تم تفعيل إشعارات الجهاز.":"لم يُسمح بالإشعارات.",p==="granted")},ab:addBen,eb:editBen,rb:rmBen,pick:id=>pick(id),rm:id=>rm(id),nu:addUser,
+ v:(id,k)=>view(id,k),om:id=>openM(id),more:()=>{lim+=20;render()},mc:closeM,att:id=>att(id),pw:()=>$("pw").classList.remove("hidden"),pwx:()=>$("pw").classList.add("hidden"),pws:pws,csv:csv,bk:()=>bk(0),bkf:()=>bk(1),zip:zipx,cam:camOpen,sn:snOpen,snx:()=>$("sn").classList.add("hidden"),ss:(id,k)=>snSel(k),sc:snScan,snp:snPing,ocr:async()=>{if(!pend.f&&!pend.b)return say("التقط أو ارفع صورة الموحدة أولًا.");if(pend.f)await ocrRun("f");if(pend.b)await ocrRun("b")},cx:camClose,cs:(id,k)=>csel(k),cc:camShot,mn:()=>$("mn").classList.remove("hidden"),mx:()=>$("mn").classList.add("hidden"),stp:repOpen,stx:repClose,tab:(id,k)=>repTab(k),gt:id=>{repClose();const r=recs.find(x=>x.id===id);if(r)isM(r.statusType)?openM(id):pick(id)},rst:(id,k)=>restoreT(id,k),pgr:(id,k)=>purge(id,k),sg:sgOpen,sgx:()=>$("sg").classList.add("hidden"),sgs:sgSave,sgd:()=>{try{localStorage.removeItem("pin");localStorage.lockMin="0"}catch{}$("sLk").value="0";$("sgm").style.color="#3e8a55";$("sgm").textContent="حُذف الرمز وعُطّل القفل."},pd:(id,k)=>pdk(k),im:()=>$("imf").click(),tpl:()=>dl("tayid-template.csv","\uFEFF"+[Object.values(HC),["شهيد","فلان الفلاني","","علان العلاني","الاب","123456789","البصرة","1990-01-31",today()]].map(r=>r.map(cs).join(",")).join("\r\n"),"text/csv;charset=utf-8"),ut:(id,k)=>updateDoc(doc(fs,"users",id),{off:k!=="1"}),pr:id=>printRec(id),prm:()=>printRec(mp),fr:()=>{["fSt","fDi","fPc"].forEach(i=>$(i).value="");lim=20;render()},rs:()=>$("rsf").click(),ap:()=>{$("ap").classList.remove("hidden");document.body.style.overflow="hidden"},apx:()=>{try{localStorage.ls=Date.now()}catch{}$("ap").classList.add("hidden");document.body.style.overflow="";renderAct()},da:id=>deleteDoc(doc(fs,"activity",id)),dall:async()=>{if(!ask("dall","اضغط مرة أخرى لحذف كل السجل."))return;const b=writeBatch(fs);acts.forEach(e=>b.delete(doc(fs,"activity",e.id)));await b.commit();say("تم حذف السجل.",1)},ntf:async()=>{if(!("Notification" in window))return say("المتصفح لا يدعم الإشعارات.");const p=await Notification.requestPermission();say(p==="granted"?"تم تفعيل إشعارات الجهاز.":"لم يُسمح بالإشعارات.",p==="granted")},ab:addBen,eb:editBen,rb:rmBen,pick:id=>pick(id),rm:id=>rm(id),nu:addUser,
  du:async id=>{if(ask("u"+id,"اضغط «حذف» مرة أخرى لحذف المستخدم."))await deleteDoc(doc(fs,"users",id))},
  inst:async()=>{if(!dp)return;dp.prompt();await dp.userChoice;dp=null;$("ib").classList.add("hidden")}};
 let dp=null;
@@ -318,7 +363,7 @@ document.addEventListener("click",e=>{const el=e.target.closest("[data-a]");if(e
 document.addEventListener("change",async e=>{const t=e.target;
  if(t.dataset.uid)return guard(()=>updateDoc(doc(fs,"users",t.dataset.uid),{role:t.value}));
  const k=t.dataset.k;if(!k||!t.files)return;const f=t.files[0];if(!f)return;if(!f.type.startsWith("image/"))return say("اختر ملف صورة.");
- try{say("جارٍ معالجة الصورة…",1);pend[k]=await shrink(f,k==="p"?TP:TC,k==="p"?38e3:45e4);setTile(k,pend[k]);say("تم اختيار الصورة.",1)}catch(x){say(err(x))}t.value=""});
+ try{say("جارٍ معالجة الصورة…",1);pend[k]=await shrink(f,k==="p"?TP:TC,k==="p"?38e3:45e4);setTile(k,pend[k]);onImg(k);say("تم اختيار الصورة.",1)}catch(x){say(err(x))}t.value=""});
 $("lb").onclick=login;$("lu").onkeydown=e=>{if(e.key==="Enter")$("lp").focus()};$("lp").onkeydown=e=>{if(e.key==="Enter")login()};let qt;$("q").oninput=()=>{clearTimeout(qt);qt=setTimeout(()=>{lim=20;render()},250)};
 try{const s=localStorage.tu;if(s)$("lu").value=s}catch{}
 onAuthStateChanged(auth,async u=>{if(busy||!u)return;try{const s=await getDoc(doc(fs,"users",u.uid));if(!s.exists()){await signOut(auth);return lm("حسابك غير مفعّل. اطلب من المدير تفعيله.")}if(s.data().off){await signOut(auth);return lm("تم تعطيل حسابك. تواصل مع المدير.")}enter(u.uid,s.data())}catch(e){lm(err(e))}});

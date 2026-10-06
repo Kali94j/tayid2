@@ -1,4 +1,4 @@
-const C="tayid-v10",A=["./","./index.html","./style.css","./app.js","./manifest.json","./icon-192.png","./icon-512.png","./login-bg.jpg","./logo.png"];
+const C="tayid-v11",A=["./","./index.html","./style.css","./app.js","./manifest.json","./icon-192.png","./icon-512.png","./login-bg.jpg","./logo.png"];
 const put=(r,x)=>{if(x.ok){const y=x.clone();caches.open(C).then(c=>c.put(r,y))}return x};
 const net=r=>new Promise((ok,no)=>{const t=setTimeout(no,3000);fetch(r).then(x=>{clearTimeout(t);ok(x)},e=>{clearTimeout(t);no(e)})});
 self.addEventListener("install",e=>e.waitUntil(caches.open(C).then(c=>Promise.all(A.map(u=>c.add(u).catch(()=>{})))).then(()=>self.skipWaiting())));
@@ -6,5 +6,6 @@ self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(k=>Promise.al
 self.addEventListener("fetch",e=>{const r=e.request,u=new URL(r.url);if(r.method!=="GET")return;
  if(u.hostname==="www.gstatic.com")return e.respondWith(caches.match(r).then(m=>m||fetch(r).then(x=>put(r,x))));
  if(u.origin!==location.origin)return;
+ if(u.pathname.indexOf("/ocr/")>=0)return e.respondWith(caches.match(r).then(m=>m||fetch(r).then(x=>put(r,x))));
  e.respondWith(net(r).then(x=>put(r,x)).catch(()=>caches.match(r).then(m=>m||caches.match("./index.html"))))});
 self.addEventListener("notificationclick",e=>{e.notification.close();e.waitUntil(clients.matchAll({type:"window"}).then(l=>l.length?l[0].focus():clients.openWindow("./")))});
