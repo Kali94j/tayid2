@@ -251,12 +251,44 @@ function ocrBin(c){const w=c.width,h=c.height,d=c.getContext("2d",{willReadFrequ
 async function ocrPass(w,cv,rois,par){await tmo(w.setParameters(par),30000,"ضبط المحرك");const out=[];for(const r of rois){const o=r?{rectangle:{left:Math.round(r[0]*cv.width),top:Math.round(r[1]*cv.height),width:Math.round(r[2]*cv.width),height:Math.round(r[3]*cv.height)}}:{};const{data}=await tmo(w.recognize(cv,o,{text:true,tsv:true}),90000,"قراءة الصورة");out.push(data)}return out}
 const DG={tessedit_char_whitelist:"0123456789",tessedit_pageseg_mode:"6"},DT={tessedit_char_whitelist:"0123456789/-.",tessedit_pageseg_mode:"6"},MZ={tessedit_char_whitelist:"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<",tessedit_pageseg_mode:"6"},NM={tessedit_char_whitelist:"",tessedit_pageseg_mode:"11"};
 function ocrSet(id,v){const el=$(id);if(el.value&&!el.classList.contains("ocr"))return false;el.value=v;el.classList.add("ocr");return true}
-async function ocrFront(cv){const E=OCRE=OCRE||await ocrW("eng"),WN=[[.15,.05,.7,.3],[.15,.15,.7,.3],[.15,.25,.7,.3],[.15,.35,.7,.3]];
- let t=(await ocrPass(E,cv,WN,DG)).map(d=>d.text),e=nidScores(t);
- if(!e.length||e[0][1]<2){t=t.concat((await ocrPass(E,ocrBin(cv),WN,DG)).map(d=>d.text));e=nidScores(t)}
- let id=e.length?e[0][0]:"",nm="",ne="";
- try{OCRA=OCRA||await ocrW("ara");nm=findNames(tsvWords((await ocrPass(OCRA,cv,[null],NM))[0].tsv))}catch(x){ne=x.message}
- return{id,nm,ne}}
+/* v21: قراءة الوجه الأمامي — الرقم من السطر العريض بقراءة متفرّقة، والاسم من ثلاثة أسطر مقصوصة بالنسبة لموضع الرقم */
+const tsvW=t=>String(t||"").split("\n").map(l=>l.split("\t")).filter(c=>c.length>=12&&c[0]==="5"&&c.slice(11).join("").trim()).map(c=>({l:+c[6],t:+c[7],w:+c[8],h:+c[9],c:+c[10],s:c.slice(11).join("\t").trim()}));
+const DFIX=s=>AD(s).replace(/[Oo]/g,"0").replace(/[Il|!]/g,"1").replace(/S/g,"5").replace(/B/g,"8").replace(/Z/g,"2");
+function nidCands(W){const o=[],bn=s=>/^(19|20)/.test(s)?1:.6,D=[];
+ for(const w of W){const a=AD(w.s),z=DFIX(w.s);if(/^\d{3,}$/.test(z)&&(a.match(/\d/g)||[]).length>=z.length*.6)D.push({w,z})}
+ for(const{w,z}of D){if(z.length===12)o.push({s:z,c:w.c*bn(z),b:w});else if(z.length>12)for(const s of[z.slice(0,12),z.slice(-12)])o.push({s,c:w.c*.4*bn(s),b:w})}
+ for(const a of D){const line=D.filter(x=>Math.abs(x.w.t+x.w.h/2-(a.w.t+a.w.h/2))<a.w.h*.6&&x.w.l>=a.w.l).sort((p,q)=>p.w.l-q.w.l);let s="",cs=0,n=0,R=0,T=1e9,B=0;
+  for(const x of line){if(n&&x.w.l-R>a.w.h*1.5)break;s+=x.z;cs+=x.w.c;n++;R=x.w.l+x.w.w;T=Math.min(T,x.w.t);B=Math.max(B,x.w.t+x.w.h);if(s.length>=12)break}
+  if(n>1&&s.length===12)o.push({s,c:cs/n*.85*bn(s),b:{l:a.w.l,t:T,w:R-a.w.l,h:B-T}})}
+ return o}
+function crop(src,x0,y0,x1,y1,k,m){m=m==null?20:m;x0=Math.max(0,Math.round(x0));y0=Math.max(0,Math.round(y0));x1=Math.min(src.width,Math.round(x1));y1=Math.min(src.height,Math.round(y1));const w=Math.max(1,x1-x0),h=Math.max(1,y1-y0),c=document.createElement("canvas");c.width=Math.round(w*k)+2*m;c.height=Math.round(h*k)+2*m;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.imageSmoothingQuality="high";x.drawImage(src,x0,y0,w,h,m,m,Math.round(w*k),Math.round(h*k));return c}
+function nameGeos(cv,box,card){const G=[],W=cv.width,H=cv.height;
+ if(box&&!card){const R=box.l+box.w,w=box.w,cy=box.t+box.h/2;for(const[dx,dy]of[[0,0],[.02,0],[0,.03],[0,-.03]])G.push([0,1,2].map(i=>{const rc=cy+(.324+.167*i+dy)*w;return[R+(-.2+dx)*w,rc-.1*w,R+(.44+dx)*w,rc+.1*w]}))}
+ if(card)for(const[dx,dy]of[[0,0],[-.015,0],[.012,.015]])G.push([0,1,2].map(i=>{const rc=(.441+.0695*i+dy)*H;return[(.585+dx)*W,rc-.04*H,(.752+dx)*W,rc+.04*H]}));
+ return G}
+function rowName(d){const toks=[];for(const w of tsvW(d.tsv).sort((p,q)=>q.l-p.l))for(const p of w.s.split(/\s+/)){const n=NR(p);if(n.length>=2&&n.length<=12&&!isKu(n))toks.push({n,c:w.c})}
+ return toks.length?{s:toks.map(x=>x.n).join(" "),c:toks.reduce((a,x)=>a+x.c,0)/toks.length}:null}
+async function ocrNames(cv,box,bn){const A=OCRA=OCRA||await ocrW("ara");await tmo(A.setParameters({tessedit_char_whitelist:"",tessedit_pageseg_mode:"7"}),30000,"ضبط المحرك");
+ const V=[[],[],[]];const rd=async c=>(await tmo(A.recognize(c,{},{text:true,tsv:true}),90000,"قراءة الاسم")).data;
+ const run=async geos=>{for(const g of geos)for(let i=0;i<3;i++){const[a,b,c,d]=g[i];for(const S of[cv,bn]){try{const r=rowName(await rd(crop(S,a,b,c,d,1)));if(r)V[i].push(r)}catch(e){if(/المهلة/.test(e.message))throw e}}}};
+ const pick=()=>V.map(L=>{const m={};for(const r of L){const o=m[r.s]||(m[r.s]={s:r.s,sum:0,n:0});o.sum+=r.c/100;o.n++}const e=Object.values(m).sort((p,q)=>q.sum-p.sum)[0];return e?{s:e.s,c:e.sum/e.n*100,n:e.n,all:L.length}:null});
+ const ok=P=>P.every(p=>p&&p.c>=45);
+ if(box)await run(nameGeos(cv,box,false));let P=pick();
+ if(!ok(P)){await run(nameGeos(cv,box,true));P=pick()}
+ const rows=P.filter(p=>p&&p.c>=35);
+ return{nm:rows.map(p=>p.s).join(" "),nc:rows.length?Math.min(...rows.map(p=>p.c))*(rows.length<3?.8:1):0,raw:P.map(p=>p?p.s+"("+Math.round(p.c)+")":"؟").join(" | ")}}
+async function ocrFront(cv){const E=OCRE=OCRE||await ocrW("eng"),sc={},bx={};
+ const add=W=>{for(const c of nidCands(W)){sc[c.s]=(sc[c.s]||0)+c.c/100;if(!bx[c.s]||c.c>bx[c.s].c)bx[c.s]={c:c.c,b:c.b}}},top=()=>Object.entries(sc).sort((p,q)=>q[1]-p[1])[0];
+ const rd=async c=>(await tmo(E.recognize(c,{},{text:true,tsv:true}),90000,"قراءة الرقم")).data;
+ await tmo(E.setParameters({tessedit_char_whitelist:"",tessedit_pageseg_mode:"11"}),30000,"ضبط المحرك");
+ add(tsvW((await rd(cv)).tsv));let t=top();const bn=ocrBin(cv);
+ if(!t||t[1]<.8){add(tsvW((await rd(bn)).tsv));t=top()}
+ let id="",box=null;
+ if(t){id=t[0];box=bx[id].b;
+  try{const pd=Math.round(box.h*.35),c=crop(cv,box.l-pd*2,box.t-pd,box.l+box.w+pd*2,box.t+box.h+pd,1.5);await tmo(E.setParameters({tessedit_char_whitelist:"0123456789",tessedit_pageseg_mode:"7"}),30000,"ضبط المحرك");const r=AD((await rd(c)).text||"").replace(/\D/g,"");if(r.length===12){sc[r]=(sc[r]||0)+.8;t=top();id=t[0];if(bx[id])box=bx[id].b}}catch{}}
+ let nm="",nc=0,raw="",ne="";
+ try{const r=await ocrNames(cv,box,bn);nm=r.nm;nc=r.nc;raw=r.raw}catch(x){ne=x.message}
+ return{id,nm,nc,raw,ne}}
 async function ocrBack(cv){const E=OCRE=OCRE||await ocrW("eng");let dsAll=[],M=null;
  for(const st of["gray","bin"]){const c=st==="gray"?cv:ocrBin(cv);
   const full=(await ocrPass(E,c,[null],{tessedit_char_whitelist:"",tessedit_pageseg_mode:"6"})).map(d=>d.text),dt=(await ocrPass(E,c,[[0,.05,1,.38],[0,.2,1,.38],[0,.35,1,.38]],DT)).map(d=>d.text),mz=(await ocrPass(E,c,[[0,.5,1,.5],[0,.65,1,.35]],MZ)).map(d=>d.text);
@@ -264,9 +296,9 @@ async function ocrBack(cv){const E=OCRE=OCRE||await ocrW("eng");let dsAll=[],M=n
  return{r:null,M,ds:dsAll}}
 async function ocrRun(k){if(OCRB){OCRQ.push(k);return}const src=pend[k],m=$("ocrm");if(!src)return;OCRB=1;m.style.color="#3e8a55";m.textContent="🔎 جارٍ قراءة البطاقة… قد يستغرق أول مرة نصف دقيقة.";
  try{const cv=await ocrPrep(src),msg=[];
-  if(k==="f"){const{id:id0,nm,ne}=await ocrFront(cv);let id=id0;if(OCRN&&OCRN.ok&&OCRN.nid&&id!==OCRN.nid){msg.push("صُحّح الرقم من الشريط السفلي");id=OCRN.nid}
+  if(k==="f"){const{id:id0,nm,nc,raw,ne}=await ocrFront(cv);let id=id0;if(OCRN&&OCRN.ok&&OCRN.nid&&id!==OCRN.nid){msg.push("صُحّح الرقم من الشريط السفلي");id=OCRN.nid}
    if(id&&ocrSet("unified",id)){msg.push("الرقم "+id);const x=dupU(id);if(x)msg.push("⚠ الرقم مسجّل لـ «"+x.personName+"»")}else if(!id)msg.push("تعذّر قراءة رقم الموحدة");
-   if(nm&&ocrSet("beneficiary",nm))msg.push("الاسم «"+nm+"»");else if(!nm)msg.push("تعذّر قراءة الاسم"+(ne?" ("+ne+")":""))}
+   if(nm&&nc>=40){if(ocrSet("beneficiary",nm))msg.push("الاسم «"+nm+"»"+(nc<65?" (غير مؤكد — راجعه)":""))}else msg.push("تعذّر قراءة الاسم"+(ne?" ("+ne+")":"")+(raw?" — المقروء: "+raw:""))}
   else{const{r,M,ds}=await ocrBack(cv);
    if(r&&ocrSet("birthDate",r.d))msg.push("تاريخ الميلاد "+r.d+" ("+r.s+")");else if(!r)msg.push("تعذّر قراءة تاريخ الميلاد (التواريخ المقروءة: "+(ds.join("، ")||"لا شيء")+" — الشريط السفلي: "+(M&&M.date?"مقروء":"غير مقروء")+")");
    if(M&&M.nid){OCRN={nid:M.nid,ok:M.docOk};const u=$("unified");if(M.docOk&&u.value&&u.value!==M.nid&&u.classList.contains("ocr")){u.value=M.nid;msg.push("صُحّح رقم الموحدة من الشريط السفلي")}else if(u.value&&u.value!==M.nid&&!u.classList.contains("ocr"))msg.push("⚠ الرقم المكتوب يخالف الشريط السفلي ("+M.nid+")");else if(!u.value&&M.docOk&&ocrSet("unified",M.nid))msg.push("الرقم "+M.nid+" (من الشريط السفلي)")}}
