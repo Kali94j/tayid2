@@ -56,6 +56,20 @@ service cloud.firestore {
     allow update: if false;
     allow delete: if isAdmin();
   }
+  match /meta/backup {
+    allow read: if isAdmin();
+    allow write: if isAdmin() && request.resource.data.keys().hasOnly(['at','by']);
+  }
+  match /history/{h} {
+    allow read: if canEdit();
+    allow create: if canEdit() && request.resource.data.keys().hasOnly(['rid','tid','k','lb','u','at','ch','undo','ref','bulk'])
+      && request.resource.data.rid is string && request.resource.data.rid.size()<=40 && request.resource.data.tid is string && request.resource.data.tid.size()<=40
+      && request.resource.data.k in ['r','b'] && request.resource.data.lb is string && request.resource.data.lb.size()<=120
+      && request.resource.data.u==get(U()).data.name && request.resource.data.at is number
+      && request.resource.data.ch is list && request.resource.data.ch.size()<=12;
+    allow update: if false;
+    allow delete: if isAdmin();
+  }
   match /{any=**} { allow read, write: if false; }
  }
 }
