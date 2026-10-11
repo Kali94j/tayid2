@@ -167,3 +167,12 @@ button.b{font-size:calc(14px*var(--fz,1))}.ra button{font-size:calc(13px*var(--f
 .li{display:flex;align-items:center;gap:6px}.li .ib{flex:none;width:42px;height:42px;min-width:42px;padding:0;font-size:14px}
 .uil{padding:5px 12px;border:1px solid var(--ln);border-radius:14px;background:var(--in);min-height:52px;margin-top:8px}.uil span{font-weight:600;font-size:14px}
 .cfw.hidden{display:none!important}
+
+/* v28: الإملاء الصوتي + حذف المدير في سجل التعديلات */
+.gr>div,.cfw,#pctW{position:relative}
+.dkm{position:absolute;left:0;top:-5px;border:0;background:transparent;font-size:17px;line-height:1;padding:4px 7px;cursor:pointer;opacity:.7;border-radius:9px;color:var(--tx)}.dkm:hover,.dkm:focus-visible{opacity:1;background:var(--in)}
+.b.rec{background:#e0443a;color:#fff;animation:pul 1s infinite}
+#dkBar{position:fixed;z-index:98;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0) + 12px);display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:16px;background:var(--cd);color:var(--tx);border:1.5px solid #e0443a;box-shadow:0 8px 28px #0005}
+#dkBar.hidden{display:none}.dkt{flex:1;min-width:0}.dkt b{display:block;font-size:14px}.dkt small{display:block;color:var(--mu);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#dkBar .b{flex:none;padding:8px 10px;font-size:13px}
+.ev>.hbt{display:flex;flex-direction:column;gap:6px;flex:none}

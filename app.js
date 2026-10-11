@@ -505,7 +505,9 @@ async function hsOpen(rid){HSR=rid;$("hs").classList.remove("hidden");$("hsl").i
  try{HSL=(await getDocs(query(collection(fs,"history"),where("rid","==",rid),limit(200)))).docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.at-a.at);hsRender()}
  catch(e){$("hsl").innerHTML='<div class="st">'+esc(err(e)+(e.code==="permission-denied"?" [history] — انشر آخر firestore.rules.":""))+'</div>'}}
 function hsRender(){const rv=new Set(HSL.filter(h=>h.ref).map(h=>h.ref));
- $("hsl").innerHTML=HSL.map(h=>`<div class="ev"><i>${h.undo?"↩":h.bulk?"📋":"✏️"}</i><div><b>${esc(h.lb)}</b><small>${esc(h.u)} — ${new Date(h.at).toLocaleString("ar",{dateStyle:"short",timeStyle:"short"})}${h.undo?" — تراجع":""}${h.bulk?" — تعديل جماعي":""}${rv.has(h.id)?" — ✓ تم التراجع عنه":""}</small>${(h.ch||[]).map(c=>`<div class="hc"><span>${esc(LB[c.f]||c.f)}:</span> <s>${esc(c.o||"—")}</s> ← <b>${esc(c.n||"—")}</b></div>`).join("")}</div>${canE&&!h.undo&&!rv.has(h.id)?`<button class="b" data-a="hu" data-id="${esc(h.id)}">↩ تراجع</button>`:""}</div>`).join("")||'<div class="st">لا توجد تعديلات مسجَّلة لهذا السجل بعد.</div>'}
+ $("hsl").innerHTML=HSL.map(h=>`<div class="ev"><i>${h.undo?"↩":h.bulk?"📋":"✏️"}</i><div><b>${esc(h.lb)}</b><small>${esc(h.u)} — ${new Date(h.at).toLocaleString("ar",{dateStyle:"short",timeStyle:"short"})}${h.undo?" — تراجع":""}${h.bulk?" — تعديل جماعي":""}${rv.has(h.id)?" — ✓ تم التراجع عنه":""}</small>${(h.ch||[]).map(c=>`<div class="hc"><span>${esc(LB[c.f]||c.f)}:</span> <s>${esc(c.o||"—")}</s> ← <b>${esc(c.n||"—")}</b></div>`).join("")}</div><div class="hbt">${canE&&!h.undo&&!rv.has(h.id)?`<button class="b" data-a="hu" data-id="${esc(h.id)}">↩ تراجع</button>`:""}${canD?`<button class="b del" data-a="hd" data-id="${esc(h.id)}">🗑 حذف</button>`:""}</div></div>`).join("")||'<div class="st">لا توجد تعديلات مسجَّلة لهذا السجل بعد.</div>'}
+async function hsDel(id){if(!canD)return say("حذف عناصر سجل التعديلات للمدير فقط.");const h=HSL.find(x=>x.id===id);if(!h)return;if(!ask("hd"+id,"اضغط «حذف» مرة أخرى لحذف هذا التعديل من السجل نهائيًا."))return;
+ await deleteDoc(doc(fs,"history",id));HSL=HSL.filter(x=>x.id!==id);hsRender();log("del","حذف تعديل من سجل «"+h.lb+"»");say("✓ حُذف التعديل من السجل.",1)}
 async function hsUndo(id){const h=HSL.find(x=>x.id===id);if(!h)return;if(!ask("hu"+id,"اضغط «تراجع» مرة أخرى لإعادة القيم القديمة."))return;
  const ref=doc(fs,h.k==="b"?"bens":"records",h.tid),s=await getDoc(ref);if(!s.exists())throw Error("السجل غير موجود.");const cur=s.data(),up={},ch=[],skip=[];
  for(const c of h.ch||[]){const cv=String(cur[c.f]==null?"":cur[c.f]);if(cv!==c.n){skip.push(LB[c.f]||c.f);continue}
@@ -581,7 +583,7 @@ const btOpen=()=>{$("btNames").innerHTML=[...new Set(recs.map(r=>r.personName))]
 const btClose=()=>{BTX=true;$("bt").classList.add("hidden");document.body.style.overflow=""};
 Object.assign(A,{th:()=>{const t=LS("theme")||"auto";setTheme(TH[(TH.indexOf(t)+1)%TH.length])},bks:()=>{try{localStorage.bsn=Date.now()+864e5}catch{}chkBk()},mdz:()=>{try{localStorage.mdz=Date.now()+864e5}catch{}$("mdn").classList.add("hidden")},mis:()=>{repOpen();repTab("m")},vs:voice,
  selm:()=>{SELM=!SELM;if(!SELM)SELS.clear();selUI();render()},sall:()=>{LASTF.forEach(r=>SELS.add(r.id));selUI();render()},selx:selEnd,tg:id=>selTog(id),bke:bulkOpen,bux:()=>$("bu").classList.add("hidden"),bus:bulkApply,bud:bulkDel,
- hs:id=>hsOpen(id),hsm:()=>mp&&hsOpen(mp),hsx:()=>$("hs").classList.add("hidden"),hu:id=>hsUndo(id),
+ hs:id=>hsOpen(id),hsm:()=>mp&&hsOpen(mp),hsx:()=>$("hs").classList.add("hidden"),hu:id=>hsUndo(id),hd:id=>hsDel(id),
  btO:btOpen,btx:btClose,btp:()=>$("btf").click(),btc:()=>{BTX=true},bta:btApply,bts:btSave});
 document.addEventListener("input",e=>{const t=e.target,k=t.dataset&&t.dataset.bt;if(!k)return;const x=BT[+t.dataset.i];if(!x)return;
  if(k==="on"){x.on=t.checked;t.closest("article").classList.toggle("off",!x.on);return}
@@ -622,6 +624,7 @@ const FT=[["errs","🐞 صفحة الأخطاء","تسجّل ما فشل عند 
  ["ui","🎛 تخصيص الواجهة","لكل مستخدم: حجم الخط وترتيب البطاقة وإخفاء الصور."],
  ["fuzzy","🔍 البحث الذكي","تسامح مع الأخطاء الإملائية واقتراح أسماء مشابهة لمنع التكرار."],
  ["learn","🧠 تعلّم التصحيح","يتذكر تصحيحاتك لأسماء القراءة الآلية ويطبّقها لاحقًا."],
+ ["dict","🎤 الإملاء الصوتي","زر ميكروفون لكل حقل يملأ البيانات بالصوت وينتقل تلقائيًا للحقل التالي."],
  ["enh","🪄 تحسين صورة البطاقة","تعديل الميلان والاتجاه والقص قبل القراءة الآلية."]];
 let CFG={},UIP={fs:100,co:[],hi:false,gp:"b"},NC=new Map(),DR=null,ADK="ft",ER=null,ERF="",DV=null,PRID="",UD=null,OCRV={},DEVS=0,KSELF=0,DVID="",SIT;
 const on=k=>CFG.feat?CFG.feat[k]!==false:true;
@@ -656,7 +659,7 @@ function reqMarks(){[...RF,...BF,"pct",...CFd().map(f=>"cf_"+f.id)].forEach(k=>{
 function applyCfg(){
  const dis=on("lists")&&CFG.dis&&CFG.dis.length?CFG.dis:DIS0,rel=on("lists")&&CFG.rel&&CFG.rel.length?CFG.rel:REL0;
  fillSel("district",dis);fillSel("relation",rel);fillSel("fDi",dis,'<option value="">الكل</option>');fillSel("btRl",rel);fillSel("btDs",dis);
- cfForm();reqMarks();$("plB").classList.toggle("hidden",!PTs().length);$("miUi").classList.toggle("hidden",!on("ui"));applyUI();
+ cfForm();dkMics();reqMarks();$("plB").classList.toggle("hidden",!PTs().length);$("miUi").classList.toggle("hidden",!on("ui"));applyUI();
  if(me&&canD&&!$("ad").classList.contains("hidden"))adTabs();
  devInit();render();if(mp)renderM()}
 /* ---- الأخطاء ---- */
@@ -840,11 +843,68 @@ function adIn(e){const t=e.target,k=t.dataset&&t.dataset.ad;if(!k)return;const i
  else if(k==="ptc"){const c=DR.pt[i].cols,x=c.indexOf(j);t.checked?x<0&&c.push(j):x>=0&&c.splice(x,1);adBody()}}
 addEventListener("input",e=>{if(e.target.matches&&e.target.matches('input[type=text],textarea'))adIn(e)});
 addEventListener("change",e=>{if(e.target.matches&&!e.target.matches('input[type=text],textarea'))adIn(e)});
+/* ===== v28: الإملاء الصوتي لكل الحقول ===== */
+const SRC=window.SpeechRecognition||window.webkitSpeechRecognition;
+let DK=null;
+const DKD=new Map(Object.entries({صفر:0,واحد:1,واحده:1,اثنين:2,اثنان:2,ثنين:2,ثلاثه:3,ثلاث:3,اربعه:4,اربع:4,خمسه:5,خمس:5,سته:6,ست:6,سبعه:7,سبع:7,ثمانيه:8,ثمان:8,تسعه:9,تسع:9}));
+const DKM=[[/كانون الثاني|يناير/,1],[/كانون الاول|ديسمبر/,12],[/تشرين الثاني|نوفمبر/,11],[/تشرين الاول|اكتوبر/,10],[/شباط|فبراير/,2],[/اذار|مارس/,3],[/نيسان|ابريل/,4],[/ايار|مايو/,5],[/حزيران|يونيو/,6],[/تموز|يوليو/,7],[/ايلول|سبتمبر/,9],[/اغسطس|(^| )اب( |$)/,8]];
+const dkDig=t=>AD(t).split(/\s+/).map(w=>/^\d+$/.test(w)?w:DKD.has(norm(w))?String(DKD.get(norm(w))):/\d/.test(w)?w.replace(/\D/g,""):"").join("");
+function dkDate(t){const s=norm(AD(t));if(/(^| )(اليوم|الان|هسه)( |$)/.test(s))return today();let m=0;for(const[r,n]of DKM)if(r.test(s)){m=n;break}
+ const nu=(s.match(/\d+/g)||[]).map(Number);let d,y;
+ if(m){if(nu.length<2)return"";const i=nu.findIndex(x=>x>=1&&x<=31);if(i<0)return"";d=nu[i];y=nu.find((x,j)=>j!==i)}
+ else{if(nu.length<3)return"";if(nu[0]>=1000)[y,m,d]=nu;else[d,m,y]=nu}
+ if(y<100)y+=y<=+String(new Date().getFullYear()).slice(2)?2000:1900;
+ if(!(m>=1&&m<=12&&d>=1&&d<=31&&y>=1900&&y<=2100))return"";const x=new Date(y,m-1,d);if(x.getMonth()!==m-1)return"";return y+"-"+String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0")}
+function dkSel(el,t){const op=[...el.options].filter(o=>o.value!==""),s=NF(t);if(!s)return false;
+ if(el.id==="pct"){const o=op.find(o=>o.value===dkDig(t));if(!o)return false;el.value=o.value;return true}
+ let o=op.find(o=>NF(o.text)===s);
+ if(!o)o=op.filter(o=>{const n=NF(o.text);return n&&s.includes(n)}).sort((a,b)=>b.text.length-a.text.length)[0];
+ if(!o&&s.length>=2)o=op.filter(o=>NF(o.text).includes(s)).sort((a,b)=>a.text.length-b.text.length)[0];
+ if(!o){let bd=9,b=null;op.forEach(x=>{const n=NF(x.text),d=lev(s,n)/Math.max(s.length,n.length);if(d<bd){bd=d;b=x}});if(bd<=.34)o=b}
+ if(!o)return false;el.value=o.value;return true}
+function dkFill(el,t){t=String(t||"").trim().replace(/[.،,؟?!]+$/,"");if(!t)return false;
+ if(el.tagName==="SELECT")return dkSel(el,t);
+ if(el.type==="date"){const v=dkDate(t);if(!v)return false;el.value=v;return true}
+ const mx=+el.maxLength>0?+el.maxLength:200;
+ if(el.inputMode==="numeric"||el.inputMode==="decimal"){const v=dkDig(t);if(!v)return false;el.value=v.slice(0,mx);return true}
+ el.value=t.slice(0,mx);return true}
+const dkAll=()=>[...$("ft").parentElement.querySelectorAll("input,select")].filter(e=>e.id&&!e.disabled&&!e.readOnly&&!["file","checkbox","radio","hidden","button"].includes(e.type));
+const dkVis=()=>dkAll().filter(e=>!e.closest(".hidden"));
+const dkLabel=e=>{const l=document.querySelector('label[for="'+e.id+'"]');return l?l.textContent.replace(/[*✱]/g,"").trim():e.id};
+function dkStop(m){const d=DK;DK=null;if(d&&d.r){d.r.onend=d.r.onerror=d.r.onresult=null;try{d.r.abort()}catch{}}$("dkBar").classList.add("hidden");$("dkB").classList.remove("rec");if(m)say(m,1)}
+function dkListen(){if(!DK)return;const el=DK.el;try{el.scrollIntoView({block:"center",behavior:"smooth"});el.focus({preventScroll:true})}catch{}
+ $("dkL").textContent="🎤 "+dkLabel(el);$("dkT").textContent="تحدّث الآن…";$("dkBar").classList.remove("hidden");
+ const r=new SRC();DK.r=r;DK.h=false;DK.t="";DK.e="";r.lang="ar-IQ";r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
+ r.onresult=ev=>{if(!DK||DK.r!==r)return;let t="",f=false;for(const x of ev.results){t+=x[0].transcript+" ";if(x.isFinal)f=true}DK.t=t.trim();$("dkT").textContent=DK.t||"…";if(f&&!DK.h){DK.h=true;dkGot(DK.t)}};
+ r.onerror=ev=>{if(DK&&DK.r===r)DK.e=ev.error};
+ r.onend=()=>{if(!DK||DK.r!==r||DK.h)return;if(DK.t){DK.h=true;return dkGot(DK.t)}
+  if(/not-allowed|service-not-allowed/.test(DK.e))return dkStop("لم تسمح للبرنامج باستخدام الميكروفون. فعّل الإذن من إعدادات المتصفح.");
+  if(DK.e==="network")return dkStop("الإملاء الصوتي يحتاج اتصالًا بالإنترنت.");
+  if(DK.e==="aborted")return;
+  if(++DK.miss>=3)return dkStop("توقف الإملاء لعدم سماع صوت. اضغط 🎤 للمتابعة.");
+  setTimeout(dkListen,300)};
+ try{r.start()}catch{dkStop("تعذّر تشغيل الميكروفون.")}}
+function dkGot(t){const s=norm(t).replace(/[.،,!؟?]/g,"").trim(),el=DK.el,L=dkVis();try{DK.r.stop()}catch{}
+ const go=e=>{if(!DK)return;if(!e)return dkStop("✓ اكتمل الإملاء — راجع البيانات ثم اضغط «إضافة».");setTimeout(()=>{if(DK){DK.el=e;DK.miss=0;dkListen()}},350)};
+ if(/^(توقف|ايقاف|وقف|انتهي|انتهيت|خلاص|كفي|تم)$/.test(s))return dkStop("تم إيقاف الإملاء.");
+ if(/^(تخطي|التالي|تجاوز)$/.test(s))return go(L[L.indexOf(el)+1]);
+ if(/^(رجوع|السابق|ارجع)$/.test(s))return go(L[Math.max(0,L.indexOf(el)-1)]);
+ if(/^(مسح|امسح|احذف|حذف)$/.test(s)){el.value="";el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}));return go(el)}
+ if(!dkFill(el,t)){DK.miss++;$("dkT").textContent="لم أفهم «"+t+"» — أعد القول أو قل «تخطي»";if(DK.miss>=4)return dkStop("لم أتمكن من فهم هذا الحقل. حاول مرة أخرى.");return go(el)}
+ el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}));
+ const L2=dkVis();go(L2[L2.indexOf(el)+1])}
+function dkStart(el){if(!SRC)return say("متصفحك لا يدعم الإملاء الصوتي. استعمل Chrome أو Samsung Internet.");
+ if(DK&&!el)return dkStop("تم إيقاف الإملاء.");if(DK)dkStop();if(SR){try{SR.stop()}catch{}}
+ const L=dkVis();el=el||L.find(e=>!e.value)||L[0];if(!el)return;
+ DK={el,miss:0};$("dkB").classList.add("rec");dkListen()}
+function dkMics(){const ok=!!SRC&&on("dict");if(!ok&&DK)dkStop();dkAll().forEach(e=>{const w=e.parentElement;let b=w.querySelector(":scope>.dkm");if(!ok){if(b)b.remove();return}
+ if(!b){b=document.createElement("button");b.type="button";b.className="dkm";b.dataset.a="dkf";b.dataset.id=e.id;b.setAttribute("aria-label","إملاء صوتي");b.textContent="🎤";w.appendChild(b)}});$("dkB").classList.toggle("hidden",!ok)}
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&DK)dkStop()});
 ["personName","beneficiary"].forEach(i=>$(i).addEventListener("input",()=>{clearTimeout(SIT);SIT=setTimeout(simShow,350)}));
 function v23start(){
  onSnapshot(doc(fs,"meta","config"),s=>{CFG=s.exists()?s.data():{};applyCfg()},e=>say(err(e)+" [meta/config] — انشر آخر firestore.rules."));
  onSnapshot(query(collection(fs,"nc"),limit(3000)),s=>{NC=new Map();s.docs.forEach(d=>{const x=d.data();NC.set(NF(x.o),{id:d.id,...x})})},()=>{})}
-Object.assign(A,{ad:adOpen,adx:()=>{$("ad").classList.add("hidden");document.body.style.overflow=""},adk:id=>adTab(id),adc:id=>adOp(id),
+Object.assign(A,{dk:()=>dkStart(),dkf:id=>dkStart($(id)),dks:()=>{if(!DK)return;const L=dkVis(),n=L[L.indexOf(DK.el)+1];try{DK.r.onend=DK.r.onresult=null;DK.r.abort()}catch{}if(!n)return dkStop("✓ اكتمل الإملاء — راجع البيانات ثم اضغط «إضافة».");DK.el=n;DK.miss=0;dkListen()},dkx:()=>dkStop("تم إيقاف الإملاء."),ad:adOpen,adx:()=>{$("ad").classList.add("hidden");document.body.style.overflow=""},adk:id=>adTab(id),adc:id=>adOp(id),
  ui:uiOpen,uix:()=>$("ui").classList.add("hidden"),uis:uiSave,uiz:uiReset,uic:id=>uiOp(id),
  pr:id=>printStart(id),prm:()=>printStart(mp),plr:()=>{if(!PTs().length)return say("لا توجد قوالب طباعة. أنشئ قالبًا من لوحة المدير.");PRID="*";if(PTs().length===1)return printList(PTs()[0]);psDraw(false)},
  pts:id=>{$("ps").classList.add("hidden");const t=PTs().find(x=>x.id===id)||null;LSS("ptl",id||"");return PRID==="*"?printList(t||PTs()[0]):printRec(PRID,t)},psx:()=>$("ps").classList.add("hidden"),
