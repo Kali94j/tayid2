@@ -898,13 +898,20 @@ function dkStart(el){if(!SRC)return say("متصفحك لا يدعم الإملا
  const L=dkVis();el=el||L.find(e=>!e.value)||L[0];if(!el)return;
  DK={el,miss:0};$("dkB").classList.add("rec");dkListen()}
 function dkMics(){const ok=!!SRC&&on("dict");if(!ok&&DK)dkStop();dkAll().forEach(e=>{const w=e.parentElement;let b=w.querySelector(":scope>.dkm");if(!ok){if(b)b.remove();return}
- if(!b){b=document.createElement("button");b.type="button";b.className="dkm";b.dataset.a="dkf";b.dataset.id=e.id;b.setAttribute("aria-label","إملاء صوتي");b.textContent="🎤";w.appendChild(b)}});$("dkB").classList.toggle("hidden",!ok)}
+ if(!b){b=document.createElement("button");b.type="button";b.className="dkm";b.dataset.a="dkf";b.dataset.id=e.id;b.setAttribute("aria-label","إملاء صوتي");b.textContent="🎤";w.appendChild(b)}});$("dkB").classList.toggle("hidden",!on("dict"))}
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&DK)dkStop()});
+/* ---- v29: رقم الإصدار + تحديث التطبيق يدويًا ---- */
+const APPV=29;$("verL").textContent="(الإصدار "+APPV+")";
+async function appUpdate(){say("جارٍ تحديث التطبيق…",1);
+ try{if(window.caches)for(const k of await caches.keys())await caches.delete(k)}catch{}
+ try{if(navigator.serviceWorker)for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister()}catch{}
+ try{const t=await(await fetch("./index.html",{cache:"reload"})).text();const u=[...t.matchAll(/(?:src|href)="([^"]*\.(?:js|css)[^"]*)"/g)].map(m=>m[1]).filter(x=>!/^https?:/.test(x));await Promise.all(u.map(x=>fetch(x,{cache:"reload"}).catch(()=>0)))}catch{}
+ location.reload()}
 ["personName","beneficiary"].forEach(i=>$(i).addEventListener("input",()=>{clearTimeout(SIT);SIT=setTimeout(simShow,350)}));
 function v23start(){
  onSnapshot(doc(fs,"meta","config"),s=>{CFG=s.exists()?s.data():{};applyCfg()},e=>say(err(e)+" [meta/config] — انشر آخر firestore.rules."));
  onSnapshot(query(collection(fs,"nc"),limit(3000)),s=>{NC=new Map();s.docs.forEach(d=>{const x=d.data();NC.set(NF(x.o),{id:d.id,...x})})},()=>{})}
-Object.assign(A,{dk:()=>dkStart(),dkf:id=>dkStart($(id)),dks:()=>{if(!DK)return;const L=dkVis(),n=L[L.indexOf(DK.el)+1];try{DK.r.onend=DK.r.onresult=null;DK.r.abort()}catch{}if(!n)return dkStop("✓ اكتمل الإملاء — راجع البيانات ثم اضغط «إضافة».");DK.el=n;DK.miss=0;dkListen()},dkx:()=>dkStop("تم إيقاف الإملاء."),ad:adOpen,adx:()=>{$("ad").classList.add("hidden");document.body.style.overflow=""},adk:id=>adTab(id),adc:id=>adOp(id),
+Object.assign(A,{upd:appUpdate,dk:()=>dkStart(),dkf:id=>dkStart($(id)),dks:()=>{if(!DK)return;const L=dkVis(),n=L[L.indexOf(DK.el)+1];try{DK.r.onend=DK.r.onresult=null;DK.r.abort()}catch{}if(!n)return dkStop("✓ اكتمل الإملاء — راجع البيانات ثم اضغط «إضافة».");DK.el=n;DK.miss=0;dkListen()},dkx:()=>dkStop("تم إيقاف الإملاء."),ad:adOpen,adx:()=>{$("ad").classList.add("hidden");document.body.style.overflow=""},adk:id=>adTab(id),adc:id=>adOp(id),
  ui:uiOpen,uix:()=>$("ui").classList.add("hidden"),uis:uiSave,uiz:uiReset,uic:id=>uiOp(id),
  pr:id=>printStart(id),prm:()=>printStart(mp),plr:()=>{if(!PTs().length)return say("لا توجد قوالب طباعة. أنشئ قالبًا من لوحة المدير.");PRID="*";if(PTs().length===1)return printList(PTs()[0]);psDraw(false)},
  pts:id=>{$("ps").classList.add("hidden");const t=PTs().find(x=>x.id===id)||null;LSS("ptl",id||"");return PRID==="*"?printList(t||PTs()[0]):printRec(PRID,t)},psx:()=>$("ps").classList.add("hidden"),
