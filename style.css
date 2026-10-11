@@ -159,3 +159,11 @@ input[type=text],input[type=password],input[type=date],input[type=search],select
 button.b{font-size:calc(14px*var(--fz,1))}.ra button{font-size:calc(13px*var(--fz,1))}.ev{font-size:calc(13.5px*var(--fz,1))}
 @media print{#pr .ph{display:flex;align-items:center;gap:12px;margin-bottom:8px}#pr .ph img{width:64px;height:64px;border-radius:50%}#pr .ph h1{margin:0}
 #pr table.pt{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}#pr table.pt th,#pr table.pt td{border:1px solid #888;padding:5px;text-align:center;color:#000}#pr table.pt th{background:#eee}#pr .pf{margin-top:14px;font-size:12px;color:#444;text-align:center}}
+
+/* v23.1: ترتيب لوحة المدير */
+.cfr{margin-top:12px;padding:14px}.cfh{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px dashed var(--ln);font-weight:700}
+.cfh b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--p);color:var(--ton);font-size:13px;flex:none}.cfh span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rb{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;margin-top:14px}.rb .b{padding:11px 6px;white-space:nowrap;text-align:center}
+.li{display:flex;align-items:center;gap:6px}.li .ib{flex:none;width:42px;height:42px;min-width:42px;padding:0;font-size:14px}
+.uil{padding:5px 12px;border:1px solid var(--ln);border-radius:14px;background:var(--in);min-height:52px;margin-top:8px}.uil span{font-weight:600;font-size:14px}
+.cfw.hidden{display:none!important}
