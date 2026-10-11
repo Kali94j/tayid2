@@ -629,7 +629,9 @@ const NF=s=>norm(AD(s)).replace(/ؤ/g,"و").replace(/ئ/g,"ي").replace(/ء/g,""
 const qf=()=>{let s=AD(val("q"));if(/^[\d\s]+$/.test(s))s=s.replace(/\s/g,"");return NF(s)};
 const DIS0=[...$("district").options].slice(1).map(o=>o.text),REL0=[...$("relation").options].slice(1).map(o=>o.text);
 const CFGR=()=>doc(fs,"meta","config"),LSS=(k,v)=>{try{localStorage[k]=v}catch{}};
-const CFd=()=>on("cfld")&&Array.isArray(CFG.cf)?CFG.cf:[];
+const GOV=["بغداد (العاصمه)","نينوى (موصل)","البصرة","صلاح الدين","دهوك","أربيل","السليمانية","ديالى","واسط","ميسان","ذي قار (ناصريه)","المثنى","بابل","كربلاء","النجف","الانبار","الديوانية (القادسيه)","كركوك","حلبجة"],BIID=["gov","gnf"],GW={k:"district",v:"محافظات",re:/^(ال)?محافظ/};
+const BCF=[{id:"gov",lb:"اسم المحافظة",t:"list",o:GOV,af:"district",fw:0,w:GW,bi:1},{id:"gnf",lb:"محل النفوس في المحافظة المختارة",t:"text",o:[],af:"district",fw:0,w:GW,bi:1}];
+const CFd=()=>[...BCF,...(on("cfld")&&Array.isArray(CFG.cf)?CFG.cf.filter(f=>!BIID.includes(f.id)):[])];
 const cfT=k=>(CFd().find(f=>"cf_"+f.id===k)||{}).t;
 const lbl=k=>LB[k]||((CFd().find(f=>"cf_"+f.id===k)||{}).lb)||k;
 const LOCK=["personName","statusType","beneficiary"];
@@ -641,7 +643,7 @@ function setV(k,v){const e=$(k);if(e.tagName==="SELECT"&&v&&![...e.options].some
 function fillSel(id,list,first){const el=$(id);if(!el)return;const v=el.value;el.innerHTML=(first||'<option value="">اختر</option>')+list.map(t=>`<option>${esc(t)}</option>`).join("");if(v){if(!list.includes(v))el.insertAdjacentHTML("beforeend",`<option>${esc(v)}</option>`);el.value=v}}
 /* ---- حقول مخصصة ---- */
 const CFA=[["","آخر النموذج (قسم «حقول إضافية»)"],["beneficiary","اسم المستفيد"],["relation","صلة القرابة"],["unified","رقم الموحدة"],["district","محل النفوس"],["birthDate","تاريخ الميلاد"],["attendanceDate","تاريخ الحضور"]];
-const cfVis=f=>!f||!f.w||!f.w.k||NF(($(f.w.k)||{}).value||"")===NF(f.w.v||""),cfVisK=k=>cfVis(CFd().find(f=>"cf_"+f.id===k));
+const cfVis=f=>{if(!f||!f.w||!f.w.k)return true;const c=NF(($(f.w.k)||{}).value||"");return f.w.re?f.w.re.test(c):c===NF(f.w.v||"")},cfVisK=k=>cfVis(CFd().find(f=>"cf_"+f.id===k));
 function cfShow(){CFd().forEach(f=>{const w=document.querySelector('.cfw[data-cf="'+f.id+'"]');if(w)w.classList.toggle("hidden",!cfVis(f))});$("cfS").classList.toggle("hidden",![...$("cfG").children].some(e=>!e.classList.contains("hidden")))}
 function cfForm(){const L=CFd(),keep={};L.forEach(f=>{const e=$("cf_"+f.id);if(e)keep[f.id]=e.value});document.querySelectorAll(".cfw").forEach(e=>e.remove());
  const mk=f=>{const d=document.createElement("div");d.className="cfw"+(f.fw?" fw":"");d.dataset.cf=f.id;d.innerHTML=`<label for="cf_${f.id}">${esc(f.lb)}</label>`+(f.t==="list"?`<select id="cf_${f.id}"><option value="">اختر</option>${(f.o||[]).map(o=>`<option>${esc(o)}</option>`).join("")}</select>`:`<input id="cf_${f.id}" type="${f.t==="date"?"date":"text"}"${f.t==="number"?' inputmode="decimal"':""} maxlength="200">`);return d},last={},end=[];
@@ -713,9 +715,14 @@ const UIKEY=()=>"ui_"+(me?me.id:"x");
 function uiLoad(){try{UIP={fs:100,co:[],hi:false,gp:"b",...JSON.parse(LS(UIKEY())||"{}")}}catch{UIP={fs:100,co:[],hi:false,gp:"b"}}}
 function applyUI(){if(!me)return;uiLoad();const a=on("ui");document.documentElement.style.setProperty("--fz",a?UIP.fs/100:1);document.body.classList.toggle("gpt",a&&UIP.gp==="t")}
 function uiDraw(){$("uiL").innerHTML=rowKeysFrom(UD.co).map((k,i)=>`<div class="li uil"><span style="flex:1">${esc(lbl(k))}</span><button class="ib" data-a="uic" data-id="u:${i}">▲</button><button class="ib" data-a="uic" data-id="d:${i}">▼</button></div>`).join("");$("uFs").value=String(UD.fs);$("uHi").checked=!!UD.hi;$("uGp").value=UD.gp}
-function uiOpen(){uiLoad();UD=JSON.parse(JSON.stringify(UIP));UD.co=rowKeysFrom(UD.co);uiDraw();$("ui").classList.remove("hidden")}
+function uiOpen(){uiLoad();UD=JSON.parse(JSON.stringify(UIP));UD.co=rowKeysFrom(UD.co);uiDraw();$("uGlW").classList.toggle("hidden",!canD);$("uGl").checked=false;$("ui").classList.remove("hidden")}
 function uiOp(s){UD.fs=+$("uFs").value;UD.hi=$("uHi").checked;UD.gp=$("uGp").value;const[o,i]=s.split(":"),a=UD.co,x=+i,y=o==="u"?x-1:x+1;if(y<0||y>=a.length)return;[a[x],a[y]]=[a[y],a[x]];uiDraw()}
-function uiSave(){UD.fs=+$("uFs").value;UD.hi=$("uHi").checked;UD.gp=$("uGp").value;if(JSON.stringify(UD.co)===JSON.stringify(defKeys()))UD.co=[];LSS(UIKEY(),JSON.stringify(UD));applyUI();render();if(mp)renderM();$("ui").classList.add("hidden");say("✓ حُفظ تخصيص الواجهة لحسابك على هذا الجهاز.",1)}
+function cfGlobal(ord){const AN=CFA.map(a=>a[0]).filter(Boolean);let cur="";const af={},pos={};ord.forEach((k,i)=>{if(k.startsWith("cf_")){const id=k.slice(3);af[id]=cur;pos[id]=i}else if(AN.includes(k))cur=k});
+ const L=(Array.isArray(CFG.cf)?CFG.cf:[]).filter(f=>!BIID.includes(f.id)).map(f=>({...f,af:f.id in af?af[f.id]:f.af||""}));
+ L.sort((a,b)=>(pos[a.id]??1e9)-(pos[b.id]??1e9));return cfgSet({cf:L})}
+async function uiSave(){UD.fs=+$("uFs").value;UD.hi=$("uHi").checked;UD.gp=$("uGp").value;const gl=canD&&$("uGl").checked,ord=[...UD.co];if(JSON.stringify(UD.co)===JSON.stringify(defKeys()))UD.co=[];LSS(UIKEY(),JSON.stringify(UD));applyUI();render();if(mp)renderM();
+ if(gl){try{await cfGlobal(ord)}catch(e){say(err(e));rep(e&&e.code==="permission-denied"?"perm":"op",err(e||{}),"uiGl");return}}
+ $("ui").classList.add("hidden");say(gl?"✓ حُفظ الترتيب وطُبّق موضع الحقول الإضافية على نموذج جميع المستخدمين.":"✓ حُفظ تخصيص الواجهة لحسابك على هذا الجهاز.",1)}
 function uiReset(){try{localStorage.removeItem(UIKEY())}catch{}applyUI();render();if(mp)renderM();$("ui").classList.add("hidden");say("رُجعت الواجهة للوضع الافتراضي.",1)}
 /* ---- قوالب الطباعة ---- */
 const PAPERS=[["A4p","A4 عمودي"],["A4l","A4 أفقي"],["A5p","A5 عمودي"],["A5l","A5 أفقي"]],NUMK=new Set(["unified","birthDate","attendanceDate","pct","ac"]);
@@ -751,14 +758,14 @@ function adTabs(){if(!ADT().some(t=>t[0]===ADK))ADK="ft";$("adt").innerHTML=ADT(
 function adOpen(){if(!canD)return;$("ad").classList.remove("hidden");document.body.style.overflow="hidden";adTab(ADK)}
 function adTab(k){ADK=k;ER=null;DV=null;const cl=o=>JSON.parse(JSON.stringify(o));
  if(k==="ls")DR={dis:[...(CFG.dis&&CFG.dis.length?CFG.dis:DIS0)],rel:[...(CFG.rel&&CFG.rel.length?CFG.rel:REL0)]};
- else if(k==="cf")DR={cf:cl(Array.isArray(CFG.cf)?CFG.cf:[])};
+ else if(k==="cf")DR={cf:cl(Array.isArray(CFG.cf)?CFG.cf.filter(f=>!BIID.includes(f.id)):[])};
  else if(k==="rq")DR={rq:new Set(Array.isArray(CFG.rq)?CFG.rq:[...BF,"pct"])};
  else if(k==="pt")DR={pt:cl(Array.isArray(CFG.pt)?CFG.pt:[])};
  else DR=null;adTabs();adBody()}
 const ftH=()=>`<div class="cd" style="margin-top:12px"><h2>الميزات</h2><small style="color:var(--mu)">أطفئ أي ميزة لتختفي من البرنامج ومن لوحة التحكم عند جميع المستخدمين. الإطفاء لا يحذف أي بيانات.</small>${FT.map(f=>`<label class="tgl"><input type="checkbox" data-ad="ft" data-j="${f[0]}"${on(f[0])?" checked":""}><span><b>${f[1]}</b><small>${f[2]}</small></span></label>`).join("")}</div>`;
 const lsBox=(w,t)=>`<div class="cd" style="margin-top:12px"><h2>${t}</h2>${DR[w].map((v,i)=>`<div class="li"><input type="text" data-ad="li" data-w="${w}" data-i="${i}" value="${esc(v)}" maxlength="40"><button class="ib" data-a="adc" data-id="lu:${w}:${i}">▲</button><button class="ib" data-a="adc" data-id="ld:${w}:${i}">▼</button><button class="ib" data-a="adc" data-id="lx:${w}:${i}">✕</button></div>`).join("")}<div class="li"><input type="text" id="lsn_${w}" placeholder="إضافة جديد…" maxlength="40"><button class="b add" data-a="adc" data-id="la:${w}">＋ إضافة</button></div></div>`;
 const lsH=()=>lsBox("dis","📍 محل النفوس")+lsBox("rel","👪 صلة القرابة")+`<div class="ac"><button class="b add" data-a="adc" data-id="lss">💾 حفظ القوائم</button><button class="b" data-a="adc" data-id="lr0">↺ القوائم الافتراضية</button></div><small style="color:var(--mu)">تغيير اسم عنصر لا يغيّر السجلات القديمة؛ تبقى قيمتها كما كُتبت وتظهر عند تعديلها.</small>`;
-const GOV=["بغداد (العاصمه)","نينوى (موصل)","البصرة","صلاح الدين","دهوك","أربيل","السليمانية","ديالى","واسط","ميسان","ذي قار (ناصريه)","المثنى","بابل","كربلاء","النجف","الانبار","الديوانية (القادسيه)","كركوك","حلبجة"],listOf=k=>[...$(k).options].slice(1).map(o=>o.text),sopt=(arr,v)=>arr.map(o=>`<option value="${esc(o[0])}"${o[0]===v?" selected":""}>${esc(o[1])}</option>`).join("");
+const listOf=k=>[...$(k).options].slice(1).map(o=>o.text),sopt=(arr,v)=>arr.map(o=>`<option value="${esc(o[0])}"${o[0]===v?" selected":""}>${esc(o[1])}</option>`).join("");
 const cfRow=(f,i)=>{const wk=(f.w&&f.w.k)||"",wv=(f.w&&f.w.v)||"",wl=wk?listOf(wk):[];if(wk&&wv&&!wl.includes(wv))wl.push(wv);
  return `<div class="cd cfr"><div class="cfh"><b>${i+1}</b><span>${esc(f.lb||"حقل جديد")}</span></div><div class="gr">
 <div class="fw"><label>اسم الحقل</label><input type="text" data-ad="cfl" data-i="${i}" value="${esc(f.lb)}" maxlength="40"></div>
@@ -769,8 +776,8 @@ const cfRow=(f,i)=>{const wk=(f.w&&f.w.k)||"",wv=(f.w&&f.w.v)||"",wl=wk?listOf(w
 ${wk?`<div class="fw"><label>القيمة التي تُظهر الحقل</label><select data-ad="cwv" data-i="${i}">${sopt([["","— اختر القيمة —"],...wl.map(x=>[x,x])],wv)}</select>${wv?"":'<small style="color:var(--r);display:block;margin-top:4px">⚠ اختر القيمة، وإلا لن يُحفظ الشرط.</small>'}<small style="color:var(--mu);display:block;margin-top:4px">يظهر الحقل عندما يكون «${wk==="district"?"محل النفوس":"صلة القرابة"}» = «${esc(wv||"؟")}»</small></div>`:""}
 ${f.t==="list"?`<div class="fw"><label>الخيارات (افصل بينها بفاصلة)</label><input type="text" data-ad="cfo" data-i="${i}" value="${esc((f.o||[]).join("، "))}"></div>`:""}</div>
 <div class="rb"><button class="b" data-a="adc" data-id="cu:${i}">▲ أعلى</button><button class="b" data-a="adc" data-id="cd:${i}">▼ أسفل</button><button class="b del" data-a="adc" data-id="cx:${i}">✕ حذف</button></div></div>`};
-const cfH=()=>{const has=["gov","gnf"].every(id=>DR.cf.some(f=>f.id===id));return `<small style="color:var(--mu);display:block;margin-top:12px">كل تغيير هنا يسري على جميع المستخدمين فور الحفظ. «موضع الظهور» يضع الحقل تحت الحقل الذي تختاره في النموذج والبطاقة، و▲▼ ترتّب الحقول التي تشترك في الموضع نفسه. «شرط الظهور» يخفي الحقل حتى يُختار محل النفوس أو صلة القرابة المطلوبة.</small>
-<div class="cd cfr"><div class="cfh"><b>⚡</b><span>جاهز: حقول المحافظات</span></div><small style="color:var(--mu);display:block;margin-bottom:10px">عند اختيار «محافظات» في محل النفوس يظهر حقلان تحته: «اسم المحافظة» (19 محافظة) و«محل النفوس».</small>${has?'<div class="st" style="margin:0">✓ الحقلان مضافان أدناه</div>':'<div class="rb"><button class="b add" data-a="adc" data-id="cfg">＋ إضافة حقلي المحافظات</button></div>'}</div>
+const cfH=()=>{return `<small style="color:var(--mu);display:block;margin-top:12px">كل تغيير هنا يسري على جميع المستخدمين فور الحفظ. «موضع الظهور» يضع الحقل تحت الحقل الذي تختاره في النموذج والبطاقة، و▲▼ ترتّب الحقول التي تشترك في الموضع نفسه. «شرط الظهور» يخفي الحقل حتى يُختار محل النفوس أو صلة القرابة المطلوبة.</small>
+<div class="cd cfr"><div class="cfh"><b>⚡</b><span>حقول المحافظات (مدمجة تلقائيًا)</span></div><small style="color:var(--mu);display:block">عند اختيار «محافظات» في محل النفوس يظهر تحته تلقائيًا حقلان: «اسم المحافظة» (19 محافظة) و«محل النفوس في المحافظة المختارة». لا تحتاج إلى إضافتهما.</small></div>
 ${DR.cf.map(cfRow).join("")}<div class="rb"><button class="b" data-a="adc" data-id="cfa">＋ حقل جديد</button><button class="b add" data-a="adc" data-id="cfs">💾 حفظ الحقول</button></div>`};
 const rqH=()=>{const L=[...BF,"pct",...CFd().map(f=>"cf_"+f.id)];return `<div class="cd" style="margin-top:12px"><h2>الحقول الإلزامية</h2><small style="color:var(--mu)">الحقول المعلَّمة لا يُحفظ السجل بدونها. الاسم والحالة واسم المستفيد إلزامية دائمًا. «نسبة العجز» تخص المصابين فقط.</small>${[...LOCK,...L].map(k=>`<label class="tgl"><input type="checkbox" data-ad="rq" data-j="${k}"${LOCK.includes(k)||DR.rq.has(k)?" checked":""}${LOCK.includes(k)?" disabled":""}><span><b>${esc(lbl(k))}</b></span></label>`).join("")}</div><div class="ac"><button class="b add" data-a="adc" data-id="rqs">💾 حفظ</button></div>`};
 const ptRow=(t,i)=>{const all=PC(),ids=all.map(a=>a[0]),sel_=t.cols.filter(k=>ids.includes(k)),ord=[...sel_,...ids.filter(k=>!sel_.includes(k))];
@@ -802,7 +809,7 @@ async function adOp(s){const[op,a,b]=s.split(":");
   case"la":{const v=$("lsn_"+a).value.trim();if(!v)return say("اكتب الاسم أولًا.");if(DR[a].includes(v))return say("هذا الاسم موجود مسبقًا.");DR[a].push(v);break}
   case"lr0":DR.dis=[...DIS0];DR.rel=[...REL0];break;
   case"lss":{const c=x=>[...new Set(x.map(y=>String(y).trim()).filter(Boolean))].slice(0,80);await cfgSet({dis:c(DR.dis),rel:c(DR.rel)});say("✓ حُفظت القوائم.",1);return}
-  case"cfa":if(DR.cf.length>=20)return say("الحد الأقصى 20 حقلًا.");DR.cf.push({id:"f"+Math.random().toString(36).slice(2,7),lb:"",t:"text",o:[],af:"",fw:0,w:null});break;
+  case"cfa":if(DR.cf.length>=18)return say("الحد الأقصى 18 حقلًا مخصصًا.");DR.cf.push({id:"f"+Math.random().toString(36).slice(2,7),lb:"",t:"text",o:[],af:"",fw:0,w:null});break;
   case"cfg":{if(DR.cf.length>18)return say("الحد الأقصى 20 حقلًا.");const w={k:"district",v:listOf("district").find(x=>NF(x)===NF("محافظات"))||"محافظات"};if(!DR.cf.some(f=>f.id==="gov"))DR.cf.push({id:"gov",lb:"اسم المحافظة",t:"list",o:[...GOV],af:"district",fw:0,w:{...w}});if(!DR.cf.some(f=>f.id==="gnf"))DR.cf.push({id:"gnf",lb:"محل النفوس",t:"text",o:[],af:"district",fw:0,w:{...w}});if(!listOf("district").includes("محافظات"))say("تنبيه: أضف «محافظات» إلى قائمة محل النفوس (تبويب القوائم) حتى يعمل الشرط.");break}
   case"cu":mvA(DR.cf,+a,-1);break;case"cd":mvA(DR.cf,+a,1);break;
   case"cx":if(!ask("cx"+a,"اضغط مرة أخرى لحذف الحقل (بياناته المدخلة تبقى محفوظة ومخفية)."))return;DR.cf.splice(+a,1);break;
