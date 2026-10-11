@@ -9,16 +9,16 @@ service cloud.firestore {
   function isAdmin(){return has() && role()=='admin'}
   function s(d,k,n){return !(k in d) || (d[k] is string && d[k].size()<=n)}
   function okPh(d){return !('photo' in d) || (d.photo is string && d.photo.size()<100000 && d.photo.matches('data:image/jpeg;base64,.*'))}
-  function okRec(d){return d.keys().hasOnly(['personName','statusType','beneficiary','relation','unified','district','birthDate','attendanceDate','benKey','photo','hf','hb','by','createdAt','updatedAt','pct','bc','sk','ld','att','del','dt'])
+  function okRec(d){return d.keys().hasOnly(['personName','statusType','beneficiary','relation','unified','district','birthDate','attendanceDate','benKey','photo','hf','hb','by','createdAt','updatedAt','pct','bc','sk','ld','att','del','dt','cf'])
     && d.personName is string && d.personName.size()>0 && d.personName.size()<=120
     && d.statusType in ['شهيد','شهيدة','مصاب','مصابه']
     && s(d,'beneficiary',120) && s(d,'relation',40) && s(d,'unified',30) && s(d,'district',40) && s(d,'birthDate',12) && s(d,'attendanceDate',12) && s(d,'benKey',140) && okPh(d)
     && (!('pct' in d) || (d.pct is int && d.pct>=30 && d.pct<=100))
     && (!('bc' in d) || (d.bc is int && d.bc>=0))
-    && (!('sk' in d) || (d.sk is list && d.sk.size()<=400)) && s(d,'ld',12) && (!('att' in d) || (d.att is list && d.att.size()<=500)) && (!('del' in d) || d.del is bool) && (!('dt' in d) || d.dt is number)}
-  function okBen(d){return d.keys().hasOnly(['rid','beneficiary','relation','unified','district','birthDate','attendanceDate','benKey','photo','hf','hb','by','createdAt','updatedAt','att','del','dt'])
+    && (!('sk' in d) || (d.sk is list && d.sk.size()<=400)) && s(d,'ld',12) && (!('att' in d) || (d.att is list && d.att.size()<=500)) && (!('del' in d) || d.del is bool) && (!('dt' in d) || d.dt is number) && (!('cf' in d) || (d.cf is map && d.cf.size()<=20))}
+  function okBen(d){return d.keys().hasOnly(['rid','beneficiary','relation','unified','district','birthDate','attendanceDate','benKey','photo','hf','hb','by','createdAt','updatedAt','att','del','dt','cf'])
     && d.rid is string && d.beneficiary is string && d.beneficiary.size()>0 && d.beneficiary.size()<=120
-    && s(d,'relation',40) && s(d,'unified',30) && s(d,'district',40) && s(d,'birthDate',12) && s(d,'attendanceDate',12) && s(d,'benKey',140) && okPh(d) && (!('att' in d) || (d.att is list && d.att.size()<=500)) && (!('del' in d) || d.del is bool) && (!('dt' in d) || d.dt is number)}
+    && s(d,'relation',40) && s(d,'unified',30) && s(d,'district',40) && s(d,'birthDate',12) && s(d,'attendanceDate',12) && s(d,'benKey',140) && okPh(d) && (!('att' in d) || (d.att is list && d.att.size()<=500)) && (!('del' in d) || d.del is bool) && (!('dt' in d) || d.dt is number) && (!('cf' in d) || (d.cf is map && d.cf.size()<=20))}
   function okImg(d){return d.keys().hasOnly(['rid','d']) && d.d is string && d.d.size()<1000000 && d.d.matches('data:image/jpeg;base64,.*')}
   match /meta/setup { allow read: if true;
     allow create: if sig() && request.resource.data.by==request.auth.uid && getAfter(/databases/$(db)/documents/users/$(request.auth.uid)).data.role=='admin'; }
@@ -68,6 +68,43 @@ service cloud.firestore {
       && request.resource.data.u==get(U()).data.name && request.resource.data.at is number
       && request.resource.data.ch is list && request.resource.data.ch.size()<=12;
     allow update: if false;
+    allow delete: if isAdmin();
+  }
+  function okCfg(d){return d.keys().hasOnly(['feat','dis','rel','cf','rq','pt','at','by'])
+    && (!('feat' in d) || d.feat is map) && (!('dis' in d) || (d.dis is list && d.dis.size()<=80)) && (!('rel' in d) || (d.rel is list && d.rel.size()<=80))
+    && (!('cf' in d) || (d.cf is list && d.cf.size()<=20)) && (!('rq' in d) || (d.rq is list && d.rq.size()<=60)) && (!('pt' in d) || (d.pt is list && d.pt.size()<=12))}
+  function okNc(d){return d.keys().hasOnly(['o','c','n','u','at']) && d.o is string && d.o.size()>0 && d.o.size()<=40 && d.c is string && d.c.size()>0 && d.c.size()<=40
+    && d.n is int && d.n>=0 && d.n<=100000 && s(d,'u',60) && d.at is number}
+  match /meta/config {
+    allow read: if has();
+    allow write: if isAdmin() && okCfg(request.resource.data);
+  }
+  match /errors/{e} {
+    allow read: if isAdmin();
+    allow create: if has() && request.resource.data.keys().hasOnly(['u','k','m','c','at','ua']) && request.resource.data.u==get(U()).data.name
+      && request.resource.data.k in ['img','net','perm','ocr','js','op'] && request.resource.data.m is string && request.resource.data.m.size()<=300
+      && s(request.resource.data,'c',120) && s(request.resource.data,'ua',80) && request.resource.data.at is number;
+    allow update: if false;
+    allow delete: if isAdmin();
+  }
+  match /devices/{d} {
+    allow get: if isAdmin() || (has() && d.matches(request.auth.uid+'_.*'));
+    allow list: if isAdmin();
+    allow create: if has() && d.matches(request.auth.uid+'_.*') && request.resource.data.keys().hasOnly(['uid','u','did','ua','at','ls','n'])
+      && request.resource.data.uid==request.auth.uid && request.resource.data.u==get(U()).data.name && d==request.auth.uid+'_'+request.resource.data.did
+      && request.resource.data.did.matches('[a-z0-9]{12}') && s(request.resource.data,'ua',80) && request.resource.data.at is number && request.resource.data.ls is number && request.resource.data.n==1;
+    allow update: if (has() && d.matches(request.auth.uid+'_.*') && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ls','ua','u','n']) && request.resource.data.ls is number && s(request.resource.data,'ua',80))
+      || (isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['en']));
+    allow delete: if isAdmin();
+  }
+  match /kills/{k} {
+    allow read: if has() && (request.auth.uid==k || isAdmin());
+    allow write: if isAdmin() && request.resource.data.keys().hasOnly(['n','by','at']) && request.resource.data.n is int;
+  }
+  match /nc/{n} {
+    allow read: if has();
+    allow create: if has() && okNc(request.resource.data);
+    allow update: if has() && okNc(request.resource.data) && request.resource.data.o==resource.data.o;
     allow delete: if isAdmin();
   }
   match /{any=**} { allow read, write: if false; }

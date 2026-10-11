@@ -139,3 +139,23 @@ body.selm .wrap{padding-bottom:110px}
 #bu,#hs{z-index:90}
 #bt{position:fixed;inset:0;z-index:60;overflow:auto;background:var(--bg);padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
 .rc.off{opacity:.5}.bt2{grid-template-columns:repeat(2,1fr)}
+
+/* v23 */
+#ad{position:fixed;inset:0;z-index:65;overflow:auto;background:var(--bg);padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+#ui,#ps{z-index:90}
+.li{display:flex;gap:8px;align-items:center;margin-top:8px}.li input[type=text]{flex:1;min-width:0}.li .ib{height:42px;min-width:42px;padding:0 8px;font-size:15px}
+.sim{font-size:12px;margin-top:6px}.sim:empty{display:none}.cb{border:0;cursor:pointer;color:var(--tx);font-size:12px}
+.rqd::after{content:" *";color:var(--r)}
+.fzb{grid-column:1/-1;text-align:right;color:var(--g)}
+.tgl{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px dashed var(--ln);color:var(--tx);font-size:14px;margin:0;cursor:pointer}.tgl small{display:block;color:var(--mu);margin-top:3px;font-size:12px;font-weight:400}
+.tgl input{appearance:none;-webkit-appearance:none;flex:none;margin:0;width:46px;height:26px;border-radius:14px;background:var(--ln);position:relative;cursor:pointer;transition:background .2s}
+.tgl input::after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:right .2s}
+.tgl input:checked{background:var(--p)}.tgl input:checked::after{right:23px}.tgl input:disabled{opacity:.55}
+body.gpt .rc{display:flex;flex-direction:column}body.gpt .rc>.bd{order:-3;align-self:flex-start}body.gpt .rc>.gal{order:-2;margin:6px 0 10px}
+body{font-size:calc(16px*var(--fz,1))}
+.kv dt{font-size:calc(12.5px*var(--fz,1))}.kv dd{font-size:calc(15px*var(--fz,1))}.kv:first-child dd{font-size:calc(16.5px*var(--fz,1))}
+label{font-size:calc(12.5px*var(--fz,1))}
+input[type=text],input[type=password],input[type=date],input[type=search],select{font-size:calc(15px*var(--fz,1))}
+button.b{font-size:calc(14px*var(--fz,1))}.ra button{font-size:calc(13px*var(--fz,1))}.ev{font-size:calc(13.5px*var(--fz,1))}
+@media print{#pr .ph{display:flex;align-items:center;gap:12px;margin-bottom:8px}#pr .ph img{width:64px;height:64px;border-radius:50%}#pr .ph h1{margin:0}
+#pr table.pt{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}#pr table.pt th,#pr table.pt td{border:1px solid #888;padding:5px;text-align:center;color:#000}#pr table.pt th{background:#eee}#pr .pf{margin-top:14px;font-size:12px;color:#444;text-align:center}}
