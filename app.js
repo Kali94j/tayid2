@@ -128,9 +128,9 @@ function statsH(L){const M=recs.filter(r=>isM(r.statusType)),I=recs.filter(r=>!i
  L.forEach(x=>(x.att||[]).forEach(t=>{const k=String(t).slice(0,7);am[k]=(am[k]||0)+1}));
  for(let i=11;i>=0;i--){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-i);mo.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"))}
  return `<div class="tl4"><div><b>${recs.length}</b>السجلات</div><div><b>${M.length}</b>الشهداء</div><div><b>${I.length}</b>المصابون</div><div><b>${L.length}</b>المستفيدون</div></div>`+bars("حسب الحالة",cnt(recs,r=>r.statusType))+bars("المستفيدون حسب محل النفوس",cnt(L,x=>x.district))+bars("المصابون حسب نسبة العجز",cnt(I.filter(r=>r.pct),r=>band(r.pct)).sort())+bars("صلة القرابة",cnt(L,x=>x.relation))+bars("تأييد الحضور (آخر 12 شهرًا)",mo.map(k=>[k,am[k]||0]))}
-function missList(bs){const R=[],chk=(x,l,rid)=>{const p=[];if(!(x.photo&&x.photo.startsWith(JP)))p.push("الصورة الشخصية");if(!x.hf)p.push("الموحدة أمامي");if(!x.hb)p.push("الموحدة خلفي");BF.forEach(k=>{if(isReq(k)&&!x[k])p.push(LB[k])});CFd().forEach(f=>{if(isReq("cf_"+f.id)&&!(x.cf||{})[f.id])p.push(f.lb)});if(p.length)R.push([l,rid,p])};
- recs.forEach(r=>{if(isM(r.statusType)){if(!(r.bc||0)&&!r.beneficiary)R.push([r.personName,r.id,["لا يوجد مستفيد"]]);if(r.beneficiary)chk(r,r.personName+" ← "+r.beneficiary,r.id)}else chk(r,r.personName,r.id)});
- bs.forEach(x=>{const r=recs.find(y=>y.id===x.rid);chk(x,(r?r.personName:"")+" ← "+x.beneficiary,x.rid)});
+function missList(bs){const R=[],chk=(x,l,rid,st)=>{const p=[];if(!(x.photo&&x.photo.startsWith(JP)))p.push("الصورة الشخصية");if(!x.hf)p.push("الموحدة أمامي");if(!x.hb)p.push("الموحدة خلفي");BF.forEach(k=>{if(isReq(k)&&!x[k]&&fvisR(k,st))p.push(LB[k])});CFd().forEach(f=>{if(isReq("cf_"+f.id)&&!(x.cf||{})[f.id]&&(!st||shOK(f.sh,st)))p.push(f.lb)});if(p.length)R.push([l,rid,p])};
+ recs.forEach(r=>{if(isM(r.statusType)){if(!(r.bc||0)&&!r.beneficiary)R.push([r.personName,r.id,["لا يوجد مستفيد"]]);if(r.beneficiary)chk(r,r.personName+" ← "+r.beneficiary,r.id,r.statusType)}else chk(r,r.personName,r.id,r.statusType)});
+ bs.forEach(x=>{const r=recs.find(y=>y.id===x.rid);chk(x,(r?r.personName:"")+" ← "+x.beneficiary,x.rid,r?r.statusType:"")});
  return R}
 function missH(bs){const R=missList(bs);return `<div class="cd" style="margin-top:12px"><h2>⚠ سجلات ناقصة (${R.length})</h2>${R.slice(0,150).map(x=>`<div class="ev" data-a="gt" data-id="${esc(x[1])}" style="cursor:pointer"><div><b>${esc(x[0])}</b><div>${x[2].map(c=>`<span class="chip">${esc(c)}</span>`).join("")}</div></div><i>›</i></div>`).join("")||'<div class="st">✓ لا توجد نواقص.</div>'}</div>`}
 async function purge(id,k,sil){if(!sil&&!ask("pg"+id,"اضغط مرة أخرى للحذف النهائي (لا رجعة فيه)."))return;const b=writeBatch(fs),im=i=>["f","b"].forEach(q=>b.delete(doc(fs,"images",i+"_"+q)));
@@ -305,7 +305,7 @@ async function ocrRun(k){if(OCRB){OCRQ.push(k);return}const src=pend[k],m=$("ocr
   OCRP="";if(used)msg.push("صُحّح اتجاه الصورة ("+used+"°)");
   if(k==="f"){const{id:id0,nm:nm0,nc,raw,ne}=res;let id=id0,nm=nm0;if(OCRN&&OCRN.ok&&OCRN.nid&&id!==OCRN.nid){msg.push("صُحّح الرقم من الشريط السفلي");id=OCRN.nid}
    if(id&&ocrSet("unified",id)){msg.push("الرقم "+id);const x=dupU(id);if(x)msg.push("⚠ الرقم مسجّل لـ «"+x.personName+"»")}else if(!id)msg.push("تعذّر قراءة رقم الموحدة");
-   if(nm&&nc>=40){const L=learnApply(nm),rw=nm;nm=L.nm;if(ocrSet("beneficiary",nm)){OCRV.b=rw;msg.push("الاسم «"+nm+"»"+(nc<65?" (غير مؤكد — راجعه)":"")+(L.ch.length?" — تصحيح متعلَّم: "+L.ch.map(c=>c[0]+"←"+c[1]).join("، "):""))}}else msg.push("تعذّر قراءة الاسم"+(ne?" ("+ne+")":"")+(raw?" — المقروء: "+raw:""))}
+   if(nm&&nc>=40){const L=learnApply(nm),rw=nm;nm=L.nm;if(ocrSet(val("statusType")&&!fvis("beneficiary",val("statusType"))?"personName":"beneficiary",nm)){OCRV.b=rw;msg.push("الاسم «"+nm+"»"+(nc<65?" (غير مؤكد — راجعه)":"")+(L.ch.length?" — تصحيح متعلَّم: "+L.ch.map(c=>c[0]+"←"+c[1]).join("، "):""))}}else msg.push("تعذّر قراءة الاسم"+(ne?" ("+ne+")":"")+(raw?" — المقروء: "+raw:""))}
   else{const{r,M,ds}=res;
    if(r&&ocrSet("birthDate",r.d))msg.push("تاريخ الميلاد "+r.d+" ("+r.s+")");else if(!r)msg.push("تعذّر قراءة تاريخ الميلاد (التواريخ المقروءة: "+(ds.join("، ")||"لا شيء")+" — الشريط السفلي: "+(M&&M.date?"مقروء":"غير مقروء")+")");
    if(M&&M.nid){OCRN={nid:M.nid,ok:M.docOk};const u=$("unified");if(M.docOk&&u.value&&u.value!==M.nid&&u.classList.contains("ocr")){u.value=M.nid;msg.push("صُحّح رقم الموحدة من الشريط السفلي")}else if(u.value&&u.value!==M.nid&&!u.classList.contains("ocr"))msg.push("⚠ الرقم المكتوب يخالف الشريط السفلي ("+M.nid+")");else if(!u.value&&M.docOk&&ocrSet("unified",M.nid))msg.push("الرقم "+M.nid+" (من الشريط السفلي)")}}
@@ -328,16 +328,17 @@ const ST={"شهيد":"اسم الشهيد","شهيدة":"اسم الشهيدة",
 const isM=s=>s==="شهيد"||s==="شهيدة",isI=s=>s==="مصاب"||s==="مصابه";
 function layout(){const st=$("statusType").value,rr=sel?recs.find(x=>x.id===sel):null;
  $("pctW").classList.toggle("hidden",!isI(st));$("sBen").classList.toggle("hidden",!!rr&&isM(st)&&!rr.beneficiary);
- $("personName").disabled=$("statusType").disabled=!!tgt}
+ $("personName").disabled=$("statusType").disabled=!!tgt;try{applyFV()}catch{}}
 function clear(){[...RF,...BF,"pct"].forEach(k=>{$(k).value="";$(k).classList.remove("bad","ocr")});pend={};OCRV={};cfSet(null);sel=selB=tgt=null;ou="";ob=null;["p","f","b"].forEach(k=>setTile(k));$("addB").classList.remove("hidden");$("edtB").classList.add("hidden");$("ft").textContent="إضافة سجل جديد";layout();render();simShow()}
 function putImgs(b,id,o){for(const k of["f","b"])if(pend[k]){o["h"+k]=true;b.set(doc(fs,"images",id+"_"+k),{rid:id,d:pend[k]});IC.delete(id+"_"+k)}if(pend.p)o.photo=pend.p}
 async function save(){
  const st=val("statusType"),m=isM(st),inj=isI(st),rr=sel?recs.find(x=>x.id===sel):null,flat=rr?(!m||!!rr.beneficiary):true;
- const cfk=CFd().map(f=>"cf_"+f.id),req=[...(tgt?[]:RF),...(tgt||flat?BF.filter(isReq):[]),...(!tgt&&inj&&isReq("pct")?["pct"]:[]),...(tgt||flat?cfk.filter(k=>isReq(k)&&cfVisK(k)):[])];
+ const cfk=CFd().map(f=>"cf_"+f.id),req=[...(tgt?[]:RF),...(tgt||flat?BF.filter(k=>isReq(k)&&fvis(k,st)):[]),...(!tgt&&inj&&isReq("pct")?["pct"]:[]),...(tgt||flat?cfk.filter(k=>isReq(k)&&cfVisK(k)):[])];
  [...RF,...BF,"pct",...cfk].forEach(k=>$(k).classList.remove("bad"));const miss=req.filter(k=>!val(k));
  if(miss.length){miss.forEach(k=>$(k).classList.add("bad"));return say("أكمل الحقول: "+miss.map(lbl).join("، "))}
  const bnk=cfk.find(k=>cfT(k)==="number"&&cfVisK(k)&&val(k)&&isNaN(+val(k).replace(/,/g,"")));if(bnk){$(bnk).classList.add("bad");return say("الحقل «"+lbl(bnk)+"» يقبل أرقامًا فقط.")}
  const d={};[...RF,...BF].forEach(k=>d[k]=val(k));d.cf=cfGet(selB?ob:rr);
+ if(!tgt&&!fvis("beneficiary",st)&&!d.beneficiary){d.beneficiary=d.personName;if(inj&&!d.relation&&!fvis("relation",st))d.relation=st}
  const du=dupU(d.unified);if(du&&d.unified!==ou&&!ask("du","⚠ رقم الموحدة مسجّل مسبقًا لـ «"+du.personName+"». اضغط مرة أخرى للمتابعة."))return;
  if(on("fuzzy")&&!sel&&!selB){const bk0=norm(d.beneficiary),sp=!tgt?sims(d.personName,"p").filter(x=>x.d>0||!m||norm(x.n)!==norm(d.personName)):[],sb=sims(d.beneficiary,"b").filter(x=>x.d>0||norm(x.n)!==bk0);if((sp.length||sb.length)&&!ask("sim","⚠ أسماء مشابهة مسجّلة: "+[...sp,...sb].slice(0,3).map(x=>"«"+x.n+"»").join("، ")+". اضغط مرة أخرى إن كان شخصًا مختلفًا."))return}
  const bk=norm(d.beneficiary),now=Date.now(),b=writeBatch(fs),mk=o=>{BF.forEach(k=>o[k]=d[k]);o.benKey=bk;if(CFd().length)o.cf=d.cf;return o},ed=!!(sel||selB),chg=ed?(selB?dif(ob||{},d,BF):dif(rr||{},{...d,pct:val("pct")},[...RF,...(flat?BF:[]),"pct"])):"";
@@ -380,7 +381,7 @@ const gal=(i,x)=>{if(uiO().hi)return"";const ph=!!(x.photo&&x.photo.startsWith(J
 const RWK={beneficiary:"اسم المستفيد",relation:"صلة القرابة",unified:"رقم الموحدة",district:"محل النفوس",birthDate:"تاريخ الميلاد",attendanceDate:"تاريخ الحضور"},RWN=new Set(["unified","birthDate","attendanceDate"]);
 const defKeys=()=>{const base=Object.keys(RWK),L=CFd(),o=[];base.forEach(k=>{o.push(k);L.filter(f=>f.af===k).forEach(f=>o.push("cf_"+f.id))});L.filter(f=>!base.includes(f.af)).forEach(f=>o.push("cf_"+f.id));return o};
 const rowKeysFrom=co=>{const all=defKeys();return[...co.filter(k=>all.includes(k)),...all.filter(k=>!co.includes(k))]};
-const rows=x=>rowKeysFrom(uiO().co).map(k=>{if(k.startsWith("cf_")){const v=(x.cf||{})[k.slice(3)];return v?kv(lbl(k),v,cfT(k)==="date"||cfT(k)==="number"):""}return kv(RWK[k],x[k],RWN.has(k))}).join("")+(x.att&&x.att.length?`<div class="kv at"><details><summary>سجل الحضور (${x.att.length})</summary>${[...x.att].sort().reverse().map(esc).join("، ")}</details></div>`:"");
+const rows=x=>{const st=x.statusType||(recs.find(r=>r.id===x.rid)||{}).statusType||"";return rowKeysFrom(uiO().co).map(k=>{if(k.startsWith("cf_")){const v=(x.cf||{})[k.slice(3)],cf=CFd().find(f=>"cf_"+f.id===k);return v&&(!cf||!st||shOK(cf.sh,st))?kv(lbl(k),v,cfT(k)==="date"||cfT(k)==="number"):""}return fvisR(k,st)?kv(RWK[k],x[k],RWN.has(k)):""}).join("")+(x.att&&x.att.length?`<div class="kv at"><details><summary>سجل الحضور (${x.att.length})</summary>${[...x.att].sort().reverse().map(esc).join("، ")}</details></div>`:"")};
 function render(){
  const fq=on("fuzzy"),q=fq?qf():qn(),flt=r=>(!$("fSt").value||r.statusType===$("fSt").value)&&(!$("fDi").value||r.district===$("fDi").value||(r.sk||[]).includes($("fDi").value))&&(!+$("fPc").value||(r.pct||0)>=+$("fPc").value),txt=r=>[r.personName,r.beneficiary,r.unified,(r.sk||[]).join(" ")].join(" ");
  let f=recs.filter(r=>(fq?NF(txt(r)):norm(txt(r))).includes(q)&&flt(r));const nP=f.length;if(fq&&q.length>=3&&nP<8)f=[...f,...fuzzy(q,f,flt,txt)];const fzOn=fq&&nP<f.length;
@@ -628,6 +629,13 @@ const FT=[["errs","🐞 صفحة الأخطاء","تسجّل ما فشل عند 
  ["enh","🪄 تحسين صورة البطاقة","تعديل الميلان والاتجاه والقص قبل القراءة الآلية."]];
 let CFG={},UIP={fs:100,co:[],hi:false,gp:"b"},NC=new Map(),DR=null,ADK="ft",ER=null,ERF="",DV=null,PRID="",UD=null,OCRV={},DEVS=0,KSELF=0,DVID="",SIT;
 const on=k=>CFG.feat?CFG.feat[k]!==false:true;
+/* ---- v30: تعديل الحقول الأساسية (الاسم الظاهر + متى يظهر) ---- */
+const LB0={...LB},FO0={beneficiary:{sh:"m"},relation:{sh:"m"}},FL0={},BFK=["personName","statusType","pct","beneficiary","relation","unified","district","birthDate","attendanceDate"],BFV=["beneficiary","relation","unified","district","birthDate","attendanceDate"];
+const FOv=k=>({...(FO0[k]||{}),...((((CFG.feat||{}).fo)||{})[k]||{})});
+const shOK=(sh,st)=>!sh||sh==="a"||(sh==="m"?isM(st):sh==="i"?isI(st):sh==="n"?false:true);
+const fvis=(k,st)=>shOK(FOv(k).sh,st),fvisR=(k,st)=>st?fvis(k,st):true;
+function applyFV(){const st=$("statusType").value;BFV.forEach(k=>{const w=$(k).parentElement;if(w)w.classList.toggle("hidden",!fvis(k,st))});cfShow()}
+function applyLabels(){BFK.forEach(k=>{const o=FOv(k).lb;LB[k]=o||LB0[k];if(typeof RWK!=="undefined"&&k in RWK)RWK[k]=LB[k];const l=document.querySelector('label[for="'+k+'"]');if(l){if(!(k in FL0))FL0[k]=l.textContent;l.textContent=o||FL0[k]}})}
 const NF=s=>norm(AD(s)).replace(/ؤ/g,"و").replace(/ئ/g,"ي").replace(/ء/g,"").replace(/([^\d\s])\1+/g,"$1").replace(/\s+/g," ").trim();
 const qf=()=>{let s=AD(val("q"));if(/^[\d\s]+$/.test(s))s=s.replace(/\s/g,"");return NF(s)};
 const DIS0=[...$("district").options].slice(1).map(o=>o.text),REL0=[...$("relation").options].slice(1).map(o=>o.text);
@@ -646,7 +654,7 @@ function setV(k,v){const e=$(k);if(e.tagName==="SELECT"&&v&&![...e.options].some
 function fillSel(id,list,first){const el=$(id);if(!el)return;const v=el.value;el.innerHTML=(first||'<option value="">اختر</option>')+list.map(t=>`<option>${esc(t)}</option>`).join("");if(v){if(!list.includes(v))el.insertAdjacentHTML("beforeend",`<option>${esc(v)}</option>`);el.value=v}}
 /* ---- حقول مخصصة ---- */
 const CFA=[["","آخر النموذج (قسم «حقول إضافية»)"],["beneficiary","اسم المستفيد"],["relation","صلة القرابة"],["unified","رقم الموحدة"],["district","محل النفوس"],["birthDate","تاريخ الميلاد"],["attendanceDate","تاريخ الحضور"]];
-const cfVis=f=>{if(!f||!f.w||!f.w.k)return true;const c=NF(($(f.w.k)||{}).value||"");return f.w.re?f.w.re.test(c):c===NF(f.w.v||"")},cfVisK=k=>cfVis(CFd().find(f=>"cf_"+f.id===k));
+const cfVis=f=>{if(!f)return true;if(!shOK(f.sh,($("statusType")||{}).value))return false;if(!f.w||!f.w.k)return true;const c=NF(($(f.w.k)||{}).value||"");return f.w.re?f.w.re.test(c):c===NF(f.w.v||"")},cfVisK=k=>cfVis(CFd().find(f=>"cf_"+f.id===k));
 function cfShow(){CFd().forEach(f=>{const w=document.querySelector('.cfw[data-cf="'+f.id+'"]');if(w)w.classList.toggle("hidden",!cfVis(f))});$("cfS").classList.toggle("hidden",![...$("cfG").children].some(e=>!e.classList.contains("hidden")))}
 function cfForm(){const L=CFd(),keep={};L.forEach(f=>{const e=$("cf_"+f.id);if(e)keep[f.id]=e.value});document.querySelectorAll(".cfw").forEach(e=>e.remove());
  const mk=f=>{const d=document.createElement("div");d.className="cfw"+(f.fw?" fw":"");d.dataset.cf=f.id;d.innerHTML=`<label for="cf_${f.id}">${esc(f.lb)}</label>`+(f.t==="list"?`<select id="cf_${f.id}"><option value="">اختر</option>${(f.o||[]).map(o=>`<option>${esc(o)}</option>`).join("")}</select>`:`<input id="cf_${f.id}" type="${f.t==="date"?"date":"text"}"${f.t==="number"?' inputmode="decimal"':""} maxlength="200">`);return d},last={},end=[];
@@ -659,7 +667,7 @@ function reqMarks(){[...RF,...BF,"pct",...CFd().map(f=>"cf_"+f.id)].forEach(k=>{
 function applyCfg(){
  const dis=on("lists")&&CFG.dis&&CFG.dis.length?CFG.dis:DIS0,rel=on("lists")&&CFG.rel&&CFG.rel.length?CFG.rel:REL0;
  fillSel("district",dis);fillSel("relation",rel);fillSel("fDi",dis,'<option value="">الكل</option>');fillSel("btRl",rel);fillSel("btDs",dis);
- cfForm();dkMics();reqMarks();$("plB").classList.toggle("hidden",!PTs().length);$("miUi").classList.toggle("hidden",!on("ui"));applyUI();
+ cfForm();dkMics();applyLabels();reqMarks();layout();$("plB").classList.toggle("hidden",!PTs().length);$("miUi").classList.toggle("hidden",!on("ui"));applyUI();
  if(me&&canD&&!$("ad").classList.contains("hidden"))adTabs();
  devInit();render();if(mp)renderM()}
 /* ---- الأخطاء ---- */
@@ -729,7 +737,7 @@ async function uiSave(){UD.fs=+$("uFs").value;UD.hi=$("uHi").checked;UD.gp=$("uG
 function uiReset(){try{localStorage.removeItem(UIKEY())}catch{}applyUI();render();if(mp)renderM();$("ui").classList.add("hidden");say("رُجعت الواجهة للوضع الافتراضي.",1)}
 /* ---- قوالب الطباعة ---- */
 const PAPERS=[["A4p","A4 عمودي"],["A4l","A4 أفقي"],["A5p","A5 عمودي"],["A5l","A5 أفقي"]],NUMK=new Set(["unified","birthDate","attendanceDate","pct","ac"]);
-const PC=()=>[["personName","اسم الشهيد/المصاب"],["statusType","الحالة"],["pct","نسبة العجز"],["beneficiary","اسم المستفيد"],["relation","صلة القرابة"],["unified","رقم الموحدة"],["district","محل النفوس"],["birthDate","تاريخ الميلاد"],["attendanceDate","تاريخ الحضور"],["ac","عدد مرات الحضور"],["by","أضيف بواسطة"],...CFd().map(f=>["cf_"+f.id,f.lb])];
+const PC=()=>[["personName",FOv("personName").lb||"اسم الشهيد/المصاب"],["statusType",LB.statusType],["pct",LB.pct],["beneficiary",LB.beneficiary],["relation",LB.relation],["unified",LB.unified],["district",LB.district],["birthDate",LB.birthDate],["attendanceDate",LB.attendanceDate],["ac","عدد مرات الحضور"],["by","أضيف بواسطة"],...CFd().map(f=>["cf_"+f.id,f.lb])];
 const plb=k=>(PC().find(a=>a[0]===k)||[0,k])[1];
 function pv(r,x,k){if(k==="personName")return r.personName||"";if(k==="statusType")return r.statusType||"";if(k==="pct")return r.pct?r.pct+"%":"";if(k==="ac")return(x.att||[]).length;if(k==="by")return x.by||r.by||"";if(k.startsWith("cf_"))return(x.cf||{})[k.slice(3)]||"";return x[k]||""}
 function pageCss(pp){let s=document.getElementById("pgs");if(!s){s=document.createElement("style");s.id="pgs";document.head.appendChild(s)}const m=/^(A\d)([pl])$/.exec(pp||"");s.textContent=m?`@page{size:${m[1]} ${m[2]==="l"?"landscape":"portrait"};margin:12mm}`:""}
@@ -756,11 +764,12 @@ async function printRec(id,t){const r=recs.find(x=>x.id===id);if(!r)return;say("
 function printStart(id){const T=PTs();if(!T.length)return printRec(id);if(T.length===1)return printRec(id,T[0]);PRID=id;psDraw(id!=="*")}
 function psDraw(def){let l="";try{l=localStorage.ptl||""}catch{}$("psl").innerHTML=PTs().map(t=>`<button class="mi" data-a="pts" data-id="${esc(t.id)}"${t.id===l?' style="border-color:var(--p)"':""}>${esc(t.n)}</button>`).join("")+(def?'<button class="mi" data-a="pts" data-id="">كشف افتراضي</button>':"");$("ps").classList.remove("hidden")}
 /* ---- لوحة المدير ---- */
-const ADT=()=>[["ft","⚙ الميزات",1],["ls","📋 القوائم","lists"],["cf","🧩 الحقول","cfld"],["rq","✱ الإلزامي","req"],["pt","🖨 القوالب","ptpl"],["er","🐞 الأخطاء","errs"],["dv","💻 الأجهزة","devs"],["lr","🧠 التعلّم","learn"]].filter(t=>t[2]===1||on(t[2]));
+const ADT=()=>[["ft","⚙ الميزات",1],["ls","📋 القوائم","lists"],["bf","🧱 الحقول الأساسية",1],["cf","🧩 الحقول","cfld"],["rq","✱ الإلزامي","req"],["pt","🖨 القوالب","ptpl"],["er","🐞 الأخطاء","errs"],["dv","💻 الأجهزة","devs"],["lr","🧠 التعلّم","learn"]].filter(t=>t[2]===1||on(t[2]));
 function adTabs(){if(!ADT().some(t=>t[0]===ADK))ADK="ft";$("adt").innerHTML=ADT().map(t=>`<button class="tab${t[0]===ADK?" on":""}" data-a="adk" data-id="${t[0]}">${t[1]}</button>`).join("")}
 function adOpen(){if(!canD)return;$("ad").classList.remove("hidden");document.body.style.overflow="hidden";adTab(ADK)}
 function adTab(k){ADK=k;ER=null;DV=null;const cl=o=>JSON.parse(JSON.stringify(o));
  if(k==="ls")DR={dis:[...(CFG.dis&&CFG.dis.length?CFG.dis:DIS0)],rel:[...(CFG.rel&&CFG.rel.length?CFG.rel:REL0)]};
+ else if(k==="bf")DR={fo:Object.fromEntries(BFK.map(x=>{const o=FOv(x);return[x,{lb:o.lb||"",sh:o.sh||"a"}]}))};
  else if(k==="cf")DR={cf:cl(Array.isArray(CFG.cf)?CFG.cf.filter(f=>!BIID.includes(f.id)):[])};
  else if(k==="rq")DR={rq:new Set(Array.isArray(CFG.rq)?CFG.rq:[...BF,"pct"])};
  else if(k==="pt")DR={pt:cl(Array.isArray(CFG.pt)?CFG.pt:[])};
@@ -775,10 +784,13 @@ const cfRow=(f,i)=>{const wk=(f.w&&f.w.k)||"",wv=(f.w&&f.w.v)||"",wl=wk?listOf(w
 <div><label>النوع</label><select data-ad="cft" data-i="${i}">${sopt([["text","نص"],["number","رقم"],["date","تاريخ"],["list","قائمة اختيار"]],f.t)}</select></div>
 <div><label>عرض الحقل</label><select data-ad="cfw" data-i="${i}">${sopt([["0","نصف السطر"],["1","السطر كاملًا"]],f.fw?"1":"0")}</select></div>
 <div class="fw"><label>موضع الظهور في النموذج (يظهر تحت الحقل المختار)</label><select data-ad="cfa" data-i="${i}">${sopt(CFA,f.af||"")}</select></div>
+<div class="fw"><label>يظهر عند الحالة</label><select data-ad="cfsh" data-i="${i}">${sopt([["","للجميع (شهيد ومصاب)"],["m","للشهيد والشهيدة فقط"],["i","للمصاب والمصابة فقط"]],f.sh||"")}</select></div>
 <div class="fw"><label>شرط الظهور</label><select data-ad="cwk" data-i="${i}">${sopt([["","يظهر دائمًا"],["district","يظهر عند اختيار محل نفوس معيّن"],["relation","يظهر عند اختيار صلة قرابة معيّنة"]],wk)}</select></div>
 ${wk?`<div class="fw"><label>القيمة التي تُظهر الحقل</label><select data-ad="cwv" data-i="${i}">${sopt([["","— اختر القيمة —"],...wl.map(x=>[x,x])],wv)}</select>${wv?"":'<small style="color:var(--r);display:block;margin-top:4px">⚠ اختر القيمة، وإلا لن يُحفظ الشرط.</small>'}<small style="color:var(--mu);display:block;margin-top:4px">يظهر الحقل عندما يكون «${wk==="district"?"محل النفوس":"صلة القرابة"}» = «${esc(wv||"؟")}»</small></div>`:""}
 ${f.t==="list"?`<div class="fw"><label>الخيارات (افصل بينها بفاصلة)</label><input type="text" data-ad="cfo" data-i="${i}" value="${esc((f.o||[]).join("، "))}"></div>`:""}</div>
 <div class="rb"><button class="b" data-a="adc" data-id="cu:${i}">▲ أعلى</button><button class="b" data-a="adc" data-id="cd:${i}">▼ أسفل</button><button class="b del" data-a="adc" data-id="cx:${i}">✕ حذف</button></div></div>`};
+const BFS=[["a","يظهر للجميع"],["m","للشهيد والشهيدة فقط"],["i","للمصاب والمصابة فقط"],["n","مخفي دائمًا"]],BFL=["personName","statusType","pct"];
+const bfH=()=>`<small style="color:var(--mu);display:block;margin-top:12px">عدّل أي حقل أساسي: غيّر اسمه الظاهر، وحدّد متى يظهر حسب الحالة. التغيير يسري على جميع المستخدمين فور الحفظ ولا يمسّ البيانات المحفوظة. الحقل المخفي لا يُطلب إلزاميًا، وعند حفظ سجل مصاب يُملأ اسم المستفيد تلقائيًا باسم المصاب وصلة القرابة بحالته.</small>`+BFK.map(k=>{const o=DR.fo[k];return `<div class="cd cfr"><div class="cfh"><span>${esc(LB0[k])}</span></div><div class="gr"><div class="fw"><label>الاسم الظاهر للحقل</label><input type="text" data-ad="bfl" data-j="${k}" value="${esc(o.lb||"")}" maxlength="40" placeholder="${esc(LB0[k])}"></div>${BFL.includes(k)?"":`<div class="fw"><label>متى يظهر الحقل؟</label><select data-ad="bfs" data-j="${k}">${sopt(BFS,o.sh||"a")}</select></div>`}</div></div>`}).join("")+`<div class="rb"><button class="b" data-a="adc" data-id="bfr">↺ الافتراضي</button><button class="b add" data-a="adc" data-id="bfv">💾 حفظ الحقول الأساسية</button></div>`;
 const cfH=()=>{return `<small style="color:var(--mu);display:block;margin-top:12px">كل تغيير هنا يسري على جميع المستخدمين فور الحفظ. «موضع الظهور» يضع الحقل تحت الحقل الذي تختاره في النموذج والبطاقة، و▲▼ ترتّب الحقول التي تشترك في الموضع نفسه. «شرط الظهور» يخفي الحقل حتى يُختار محل النفوس أو صلة القرابة المطلوبة.</small>
 <div class="cd cfr"><div class="cfh"><b>⚡</b><span>حقول المحافظات (مدمجة تلقائيًا)</span></div><small style="color:var(--mu);display:block">عند اختيار «محافظات» في محل النفوس يظهر تحته تلقائيًا حقلان: «اسم المحافظة» (19 محافظة) و«محل النفوس في المحافظة المختارة». لا تحتاج إلى إضافتهما.</small></div>
 ${DR.cf.map(cfRow).join("")}<div class="rb"><button class="b" data-a="adc" data-id="cfa">＋ حقل جديد</button><button class="b add" data-a="adc" data-id="cfs">💾 حفظ الحقول</button></div>`};
@@ -800,7 +812,7 @@ function dvH(){const g={};DV.forEach(d=>(g[d.uid]=g[d.uid]||[]).push(d));
  return `<small style="color:var(--mu);display:block;margin-top:12px">إنهاء الجلسة يُخرج الجهاز عند اتصاله بالإنترنت ويمسح البيانات المحفوظة عليه، لكن يستطيع صاحبه الدخول من جديد بكلمة سره. لمنعه تمامًا استعمل «تعطيل» أو غيّر كلمة سره.</small>`+(Object.values(g).map(L=>`<div class="cd" style="margin-top:12px"><div class="mph" style="margin:0 0 6px"><h2 style="margin:0;flex:1">👤 ${esc(L[0].u)}</h2><button class="b del" data-a="adc" data-id="dvu:${esc(L[0].uid)}">🚪 إنهاء كل جلساته</button></div>${L.map(d=>`<div class="ev"><i>${/Android|iPhone|iPad/.test(d.ua||"")?"📱":"💻"}</i><div><b>${esc(d.ua)}</b>${d.id===DVID?' <span class="nw" style="background:var(--p)">هذا الجهاز</span>':""}<small>آخر ظهور: ${ago(d.ls)} — أول دخول: ${new Date(d.at).toLocaleDateString("ar")} — مرات الدخول: ${d.n||1}</small></div>${d.id===DVID?"":`<button class="b del" data-a="adc" data-id="dvx:${esc(d.id)}">إنهاء</button>`}</div>`).join("")}</div>`).join("")||'<div class="st">لا توجد أجهزة مسجّلة بعد.</div>')}
 const lrH=()=>{const L=[...NC.values()].sort((a,b)=>b.n-a.n);return `<div class="cd" style="margin-top:12px"><h2>🧠 التصحيحات المتعلَّمة (${L.length})</h2><small style="color:var(--mu)">كل ما صحّحه المستخدمون في أسماء القراءة الآلية. يُطبَّق تلقائيًا في القراءة التالية. احذف ما تراه خاطئًا.</small>${L.map(x=>`<div class="ev"><div><b>${esc(x.o)}</b> ← <b style="color:var(--p)">${esc(x.c)}</b><small>${x.n} مرة · ${esc(x.u||"")}</small></div><button class="b del" data-a="adc" data-id="lrx:${esc(x.id)}">✕</button></div>`).join("")||'<div class="st">لم يتعلّم البرنامج شيئًا بعد.</div>'}</div>`};
 async function adBody(){const b=$("adb"),k=ADK;try{
- if(k==="ft")b.innerHTML=ftH();else if(k==="ls")b.innerHTML=lsH();else if(k==="cf")b.innerHTML=cfH();else if(k==="rq")b.innerHTML=rqH();else if(k==="pt")b.innerHTML=ptH();else if(k==="lr")b.innerHTML=lrH();
+ if(k==="ft")b.innerHTML=ftH();else if(k==="bf")b.innerHTML=bfH();else if(k==="ls")b.innerHTML=lsH();else if(k==="cf")b.innerHTML=cfH();else if(k==="rq")b.innerHTML=rqH();else if(k==="pt")b.innerHTML=ptH();else if(k==="lr")b.innerHTML=lrH();
  else if(k==="er"){if(!ER){b.innerHTML='<div class="st">جارٍ التحميل…</div>';await erLoad()}if(ADK===k)b.innerHTML=erH()}
  else if(k==="dv"){if(!DV){b.innerHTML='<div class="st">جارٍ التحميل…</div>';await dvLoad()}if(ADK===k)b.innerHTML=dvH()}
  }catch(e){b.innerHTML='<div class="st">'+esc(err(e)+(e.code==="permission-denied"?" — انشر آخر firestore.rules.":""))+'</div>'}}
@@ -812,11 +824,13 @@ async function adOp(s){const[op,a,b]=s.split(":");
   case"la":{const v=$("lsn_"+a).value.trim();if(!v)return say("اكتب الاسم أولًا.");if(DR[a].includes(v))return say("هذا الاسم موجود مسبقًا.");DR[a].push(v);break}
   case"lr0":DR.dis=[...DIS0];DR.rel=[...REL0];break;
   case"lss":{const c=x=>[...new Set(x.map(y=>String(y).trim()).filter(Boolean))].slice(0,80);await cfgSet({dis:c(DR.dis),rel:c(DR.rel)});say("✓ حُفظت القوائم.",1);return}
+  case"bfr":DR.fo=Object.fromEntries(BFK.map(x=>[x,{lb:"",sh:(FO0[x]||{}).sh||"a"}]));break;
+  case"bfv":{const fo={};BFK.forEach(x=>{const o=DR.fo[x]||{};fo[x]={lb:String(o.lb||"").trim().slice(0,40),sh:BFL.includes(x)?"a":["a","m","i","n"].includes(o.sh)?o.sh:"a"}});await cfgSet({feat:{...(CFG.feat||{}),fo}});say("✓ حُفظت الحقول الأساسية.",1);return}
   case"cfa":if(DR.cf.length>=18)return say("الحد الأقصى 18 حقلًا مخصصًا.");DR.cf.push({id:"f"+Math.random().toString(36).slice(2,7),lb:"",t:"text",o:[],af:"",fw:0,w:null});break;
   case"cfg":{if(DR.cf.length>18)return say("الحد الأقصى 20 حقلًا.");const w={k:"district",v:listOf("district").find(x=>NF(x)===NF("محافظات"))||"محافظات"};if(!DR.cf.some(f=>f.id==="gov"))DR.cf.push({id:"gov",lb:"اسم المحافظة",t:"list",o:[...GOV],af:"district",fw:0,w:{...w}});if(!DR.cf.some(f=>f.id==="gnf"))DR.cf.push({id:"gnf",lb:"محل النفوس",t:"text",o:[],af:"district",fw:0,w:{...w}});if(!listOf("district").includes("محافظات"))say("تنبيه: أضف «محافظات» إلى قائمة محل النفوس (تبويب القوائم) حتى يعمل الشرط.");break}
   case"cu":mvA(DR.cf,+a,-1);break;case"cd":mvA(DR.cf,+a,1);break;
   case"cx":if(!ask("cx"+a,"اضغط مرة أخرى لحذف الحقل (بياناته المدخلة تبقى محفوظة ومخفية)."))return;DR.cf.splice(+a,1);break;
-  case"cfs":{const L=DR.cf.map(f=>({id:f.id,lb:String(f.lb||"").trim().slice(0,40),t:f.t,o:f.t==="list"?(f.o||[]).slice(0,40):[],af:CFA.some(a=>a[0]===f.af)?f.af||"":"",fw:f.fw?1:0,w:f.w&&f.w.k&&f.w.v?{k:f.w.k,v:String(f.w.v).slice(0,60)}:null}));if(L.some(f=>!f.lb))return say("اكتب اسمًا لكل حقل.");{const x=DR.cf.find(f=>f.w&&f.w.k&&!f.w.v);if(x)return say("حدّد القيمة التي تُظهر الحقل «"+(x.lb||"جديد")+"» في «شرط الظهور».")}if(new Set(L.map(f=>f.lb)).size!==L.length)return say("يجب أن تختلف أسماء الحقول.");if(L.some(f=>f.t==="list"&&!f.o.length))return say("حقل القائمة يحتاج خيارًا واحدًا على الأقل.");await cfgSet({cf:L});say("✓ حُفظت الحقول.",1);return}
+  case"cfs":{const L=DR.cf.map(f=>({id:f.id,lb:String(f.lb||"").trim().slice(0,40),t:f.t,o:f.t==="list"?(f.o||[]).slice(0,40):[],af:CFA.some(a=>a[0]===f.af)?f.af||"":"",fw:f.fw?1:0,sh:f.sh==="m"||f.sh==="i"?f.sh:"",w:f.w&&f.w.k&&f.w.v?{k:f.w.k,v:String(f.w.v).slice(0,60)}:null}));if(L.some(f=>!f.lb))return say("اكتب اسمًا لكل حقل.");{const x=DR.cf.find(f=>f.w&&f.w.k&&!f.w.v);if(x)return say("حدّد القيمة التي تُظهر الحقل «"+(x.lb||"جديد")+"» في «شرط الظهور».")}if(new Set(L.map(f=>f.lb)).size!==L.length)return say("يجب أن تختلف أسماء الحقول.");if(L.some(f=>f.t==="list"&&!f.o.length))return say("حقل القائمة يحتاج خيارًا واحدًا على الأقل.");await cfgSet({cf:L});say("✓ حُفظت الحقول.",1);return}
   case"rqs":await cfgSet({rq:[...DR.rq].filter(k=>!LOCK.includes(k))});say("✓ حُفظت الحقول الإلزامية.",1);return;
   case"pta":if(DR.pt.length>=12)return say("الحد الأقصى 12 قالبًا.");DR.pt.push({id:"t"+Math.random().toString(36).slice(2,7),n:"قالب جديد",ti:"",ty:"table",pp:"A4l",lg:1,im:["p","f","b"],cols:["personName","beneficiary","relation","unified","district","birthDate","attendanceDate"],ft:""});break;
   case"px":if(!ask("px"+a,"اضغط مرة أخرى لحذف القالب."))return;DR.pt.splice(+a,1);break;
@@ -834,7 +848,7 @@ function adIn(e){const t=e.target,k=t.dataset&&t.dataset.ad;if(!k)return;const i
  if(k==="ft")return guard(()=>cfgSet({feat:{...(CFG.feat||{}),[j]:t.checked}}),"meta/config");
  if(!DR)return;
  if(k==="li")DR[t.dataset.w][i]=t.value;else if(k==="cfl")DR.cf[i].lb=t.value;else if(k==="cft"){DR.cf[i].t=t.value;adBody()}
- else if(k==="cfw")DR.cf[i].fw=+t.value;else if(k==="cfa")DR.cf[i].af=t.value;else if(k==="cwk"){DR.cf[i].w=t.value?{k:t.value,v:""}:null;adBody()}else if(k==="cwv")DR.cf[i].w.v=t.value;
+ else if(k==="bfl")DR.fo[j].lb=t.value;else if(k==="bfs")DR.fo[j].sh=t.value;else if(k==="cfsh")DR.cf[i].sh=t.value;else if(k==="cfw")DR.cf[i].fw=+t.value;else if(k==="cfa")DR.cf[i].af=t.value;else if(k==="cwk"){DR.cf[i].w=t.value?{k:t.value,v:""}:null;adBody()}else if(k==="cwv")DR.cf[i].w.v=t.value;
  else if(k==="cfo")DR.cf[i].o=t.value.split(/[،,]/).map(x=>x.trim()).filter(Boolean);
  else if(k==="rq")t.checked?DR.rq.add(j):DR.rq.delete(j);
  else if(k==="ptn")DR.pt[i].n=t.value;else if(k==="ptt")DR.pt[i].ti=t.value;else if(k==="ptf")DR.pt[i].ft=t.value;else if(k==="ptp")DR.pt[i].pp=t.value;
@@ -901,7 +915,7 @@ function dkMics(){const ok=!!SRC&&on("dict");if(!ok&&DK)dkStop();dkAll().forEach
  if(!b){b=document.createElement("button");b.type="button";b.className="dkm";b.dataset.a="dkf";b.dataset.id=e.id;b.setAttribute("aria-label","إملاء صوتي");b.textContent="🎤";w.appendChild(b)}});$("dkB").classList.toggle("hidden",!on("dict"))}
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&DK)dkStop()});
 /* ---- v29: رقم الإصدار + تحديث التطبيق يدويًا ---- */
-const APPV=29;$("verL").textContent="(الإصدار "+APPV+")";
+const APPV=30;$("verL").textContent="(الإصدار "+APPV+")";
 async function appUpdate(){say("جارٍ تحديث التطبيق…",1);
  try{if(window.caches)for(const k of await caches.keys())await caches.delete(k)}catch{}
  try{if(navigator.serviceWorker)for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister()}catch{}
