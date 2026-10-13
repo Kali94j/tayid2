@@ -387,13 +387,15 @@ const kv=(l,v,n)=>`<div class="kv"><dt>${l}</dt><dd${n?' class="n"':""}>${esc(v)
 const gal=(i,x)=>{if(uiO().hi)return"";const ph=!!(x.photo&&x.photo.startsWith(JP)),g=(k,t,has,src)=>`<button class="gi${k==="p"?"":" c"}" data-a="v" data-id="${i}" data-k="${k}"${has?"":" disabled"}>${src?`<img src="${esc(src)}" alt="">`:`<span>${has?"جارٍ التحميل…":"لا توجد صورة"}</span>`}<em>${t}</em></button>`;
  return `<div class="gal">${g("p","الصورة الشخصية",ph,ph?x.photo:"")}${g("f","الموحدة - الأمامي",x.hf)}${g("b","الموحدة - الخلفي",x.hb)}</div>`};
 const RWK={beneficiary:"اسم المستفيد",relation:"صلة القرابة",unified:"رقم الموحدة",district:"محل النفوس",birthDate:"تاريخ الميلاد",attendanceDate:"تاريخ الحضور"},RWN=new Set(["unified","birthDate","attendanceDate"]);
-const defKeys=()=>{const base=Object.keys(RWK),L=CFd(),o=[];base.forEach(k=>{o.push(k);L.filter(f=>f.af===k).forEach(f=>o.push("cf_"+f.id))});L.filter(f=>!base.includes(f.af)).forEach(f=>o.push("cf_"+f.id));return o};
+let MM=null;const memo=(k,f)=>MM?(k in MM?MM[k]:(MM[k]=f())):f();
+const defKeys=()=>memo("dk",()=>{const base=Object.keys(RWK),L=CFd(),o=[];base.forEach(k=>{o.push(k);L.filter(f=>f.af===k).forEach(f=>o.push("cf_"+f.id))});L.filter(f=>!base.includes(f.af)).forEach(f=>o.push("cf_"+f.id));return o});
 const rowKeysFrom=co=>{const all=defKeys();return[...co.filter(k=>all.includes(k)),...all.filter(k=>!co.includes(k))]};
 const rows=(x,set)=>{const st=x.statusType||(recs.find(r=>r.id===x.rid)||{}).statusType||"";return rowKeysFrom(uiO().co).map(k=>{if(set&&!set.has(k))return"";if(k.startsWith("cf_")){const v=(x.cf||{})[k.slice(3)],cf=CFd().find(f=>"cf_"+f.id===k);return v&&(!cf||!st||shOK(cf.sh,st))?kv(lbl(k),v,cfT(k)==="date"||cfT(k)==="number"):""}return fvisR(k,st)?kv(RWK[k],x[k],RWN.has(k)):""}).join("")+(x.att&&x.att.length&&(!set||set.has("att"))?`<div class="kv at"><details><summary>سجل الحضور (${x.att.length})</summary>${[...x.att].sort().reverse().map(esc).join("، ")}</details></div>`:"")};
 const infoRows=(x,sc)=>{const st=x.statusType||"",set=CSv(sc);return(set.has("count")&&isM(st)?kv("عدد المستفيدين",(x.bc||0)+(x.beneficiary?1:0),1):"")+(set.has("pct")&&isI(st)?kv(LB.pct,x.pct?x.pct+"%":"-",1):"")+rows(x,set)};
-function render(){
+function render(){MM={};try{renderL()}finally{MM=null}}
+function renderL(){
  const fq=on("fuzzy"),q=fq?qf():qn(),flt=r=>(!$("fSt").value||r.statusType===$("fSt").value)&&(!$("fDi").value||r.district===$("fDi").value||(r.sk||[]).includes($("fDi").value))&&(!+$("fPc").value||(r.pct||0)>=+$("fPc").value),txt=r=>[r.personName,r.beneficiary,r.unified,(r.sk||[]).join(" ")].join(" ");
- let f=recs.filter(r=>(fq?NF(txt(r)):norm(txt(r))).includes(q)&&flt(r));const nP=f.length;if(fq&&q.length>=3&&nP<8)f=[...f,...fuzzy(q,f,flt,txt)];const fzOn=fq&&nP<f.length;
+ let f=recs.filter(r=>(fq?nft(r).t:norm(txt(r))).includes(q)&&flt(r));const nP=f.length;if(fq&&q.length>=3&&nP<8)f=[...f,...fuzzy(q,f,flt,txt)];const fzOn=fq&&nP<f.length;
  LASTF=f;$("n0").textContent=recs.length;$("n1").textContent=recs.filter(r=>isM(r.statusType)).length;$("n2").textContent=recs.filter(r=>!isM(r.statusType)).length;
  io.disconnect();
  $("list").innerHTML=f.length?f.slice(0,lim).map((r,ix)=>{const i=esc(r.id),fzh=ix===nP&&fzOn?'<div class="st fzb">🔍 نتائج مشابهة (تصحيح إملائي)</div>':"";
@@ -404,7 +406,8 @@ function render(){
 function openM(id){if(!recs.find(x=>x.id===id))return;if(unB)unB();mp=id;bens=[];$("mp").classList.remove("hidden");document.body.style.overflow="hidden";scrollTo(0,0);
  unB=onSnapshot(query(collection(fs,"bens"),where("rid","==",id)),s=>{bens=s.docs.map(d=>({id:d.id,...d.data()})).filter(x=>!x.del);renderM()},e=>say(err(e)));renderM()}
 function closeM(){mp=null;if(unB){unB();unB=null}bens=[];$("mp").classList.add("hidden");document.body.style.overflow="";render()}
-function renderM(){const r=recs.find(x=>x.id===mp);if(!r)return closeM();io.disconnect();
+function renderM(){MM={};try{renderMP()}finally{MM=null}}
+function renderMP(){const r=recs.find(x=>x.id===mp);if(!r)return closeM();io.disconnect();
  const inj=!isM(r.statusType);$("abB").classList.toggle("hidden",inj);
  if(inj){const i=esc(r.id),set=CSv("id");$("mpT").textContent=r.personName;$("mpS").textContent=r.statusType+(r.pct?" - "+LB.pct+": "+r.pct+"%":"");
   $("mpb").innerHTML=`<article class="rc i ben"><dl>${infoRows(r,"id")}</dl>${set.has("gal")?gal(i,r):""}<div class="ra">${bt("att",i,BLb("at"),"add")}${canE?bt("eb",i,BLb("ed")):""}${bt("pr",i,BLb("pr"))}${canD?bt("rm",i,BLb("dl"),"del"):""}</div></article>`;obs($("mpb"));return}
@@ -652,9 +655,11 @@ const BLb=k=>String((((CFG.feat||{}).bl)||{})[k]||"").trim()||BL0[k];
 const BLo=st=>BLb(st==="شهيد"?"os":st==="شهيدة"?"osf":st==="مصاب"?"oi":"oif");
 const CSD={ms:["count"],is:["pct"]},CSN={ms:"بطاقة الشهيد/الشهيدة في القائمة",is:"بطاقة المصاب/المصابة في القائمة",md:"صفحة الشهيد/الشهيدة (بطاقات المستفيدين)",id:"صفحة المصاب/المصابة"};
 const CSKc=sc=>{const A=defKeys();return sc==="ms"?["count"]:sc==="md"?[...A,"att","gal"]:["pct",...A,"att","gal"]};
-const CSv=sc=>{const cs=(CFG.feat||{}).cs||{};if(sc==="ms"||sc==="is")return new Set(Array.isArray(cs[sc])?cs[sc]:CSD[sc]);const h=cs[sc==="md"?"mh":"ih"],H=new Set(Array.isArray(h)?h:[]);return new Set(CSKc(sc).filter(k=>!H.has(k)))};
+const CSv=sc=>memo("cs"+sc,()=>{const cs=(CFG.feat||{}).cs||{};if(sc==="ms"||sc==="is")return new Set(Array.isArray(cs[sc])?cs[sc]:CSD[sc]);const h=cs[sc==="md"?"mh":"ih"],H=new Set(Array.isArray(h)?h:[]);return new Set(CSKc(sc).filter(k=>!H.has(k)))});
 const CSL=k=>k==="count"?"عدد المستفيدين":k==="att"?"سجل الحضور":k==="gal"?"الصور (الشخصية والموحدة)":k==="pct"?LB.pct:lbl(k);
 function applyLabels(){{const t=(e,k)=>{if(e)e.textContent=BLb(k)};t($("abB"),"ab");t(document.querySelector('[data-a="prm"]'),"pl");t($("hsmB"),"hm")}BFK.forEach(k=>{const o=FOv(k).lb;LB[k]=o||LB0[k];if(typeof RWK!=="undefined"&&k in RWK)RWK[k]=LB[k];const l=document.querySelector('label[for="'+k+'"]');if(l){if(!(k in FL0))FL0[k]=l.textContent;l.textContent=o||FL0[k]}})}
+const NTX=new Map(),ntxt=r=>[r.personName,r.beneficiary,r.unified,(r.sk||[]).join(" ")].join(" ");
+const nft=r=>{const s=ntxt(r),c=NTX.get(r.id);if(c&&c.s===s)return c;const t=NF(s),n={s,t,w:t.split(" ").filter(Boolean)};NTX.set(r.id,n);return n};
 const NF=s=>norm(AD(s)).replace(/ؤ/g,"و").replace(/ئ/g,"ي").replace(/ء/g,"").replace(/([^\d\s])\1+/g,"$1").replace(/\s+/g," ").trim();
 const qf=()=>{let s=AD(val("q"));if(/^[\d\s]+$/.test(s))s=s.replace(/\s/g,"");return NF(s)};
 const DIS0=[...$("district").options].slice(1).map(o=>o.text),REL0=[...$("relation").options].slice(1).map(o=>o.text);
@@ -718,10 +723,11 @@ function learnFrom(raw,fin){if(!on("learn")||!me||!raw||!fin)return;const a=raw.
   if(lev(k,NF(c))>Math.max(3,k.length*.5))return;
   setDoc(doc(fs,"nc",ncId(k)),{o:k,c,n:(e&&e.c===c?e.n:0)+1,u:me.name,at:Date.now()}).catch(()=>{})})}
 /* ---- البحث الذكي والأسماء المتشابهة ---- */
+const levb=(a,b,mx)=>{const n=a.length,m=b.length;if(Math.abs(n-m)>mx)return mx+1;let p=new Array(m+1),c=new Array(m+1);for(let j=0;j<=m;j++)p[j]=j;for(let i=1;i<=n;i++){c[0]=i;let lo=c[0];for(let j=1;j<=m;j++){const v=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a.charCodeAt(i-1)===b.charCodeAt(j-1)?0:1));c[j]=v;if(v<lo)lo=v}if(lo>mx)return mx+1;const t=p;p=c;c=t}return p[m]};
 const tol=l=>l<=3?0:l<=8?1:l<=14?2:3,tolS=l=>l<=5?0:l<=9?1:l<=16?2:3;
 function fuzzy(qs,have,ok,txt){const hs=new Set(have),qt=qs.split(" ").filter(Boolean);if(!qt.length||qt.some(t=>t.length<3||/\d/.test(t)))return[];const out=[];
- for(const r of recs){if(hs.has(r)||!ok(r))continue;const tk=NF(txt(r)).split(" ").filter(Boolean);let tot=0,all=true;
-  for(const t of qt){const tl=tol(t.length);let b=99;for(const w of tk){if(w.includes(t)){b=0;break}if(Math.abs(w.length-t.length)>tl)continue;const d=lev(t,w);if(d<b)b=d}if(b>tl){all=false;break}tot+=b}
+ for(const r of recs){if(hs.has(r)||!ok(r))continue;const tk=nft(r).w;let tot=0,all=true;
+  for(const t of qt){const tl=tol(t.length);let b=99;for(const w of tk){if(w.includes(t)){b=0;break}if(Math.abs(w.length-t.length)>tl)continue;const d=levb(t,w,tl);if(d<b)b=d}if(b>tl){all=false;break}tot+=b}
   if(all)out.push([tot,r])}
  return out.sort((a,b)=>a[0]-b[0]).slice(0,60).map(x=>x[1])}
 function sims(nm,kind,ex){const q=NF(nm);if(q.length<4)return[];const t=tolS(q.length),out=[],dn=new Set((CFG.dis&&CFG.dis.length?CFG.dis:DIS0).map(NF));
@@ -938,7 +944,7 @@ function dkMics(){const ok=!!SRC&&on("dict");if(!ok&&DK)dkStop();dkAll().forEach
  if(!b){b=document.createElement("button");b.type="button";b.className="dkm";b.dataset.a="dkf";b.dataset.id=e.id;b.setAttribute("aria-label","إملاء صوتي");b.textContent="🎤";w.appendChild(b)}});$("dkB").classList.toggle("hidden",!on("dict"))}
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&DK)dkStop()});
 /* ---- v29: رقم الإصدار + تحديث التطبيق يدويًا ---- */
-const APPV=32;$("verL").textContent="(الإصدار "+APPV+")";
+const APPV=33;$("verL").textContent="(الإصدار "+APPV+")";
 async function appUpdate(){say("جارٍ تحديث التطبيق…",1);
  try{if(window.caches)for(const k of await caches.keys())await caches.delete(k)}catch{}
  try{if(navigator.serviceWorker)for(const r of await navigator.serviceWorker.getRegistrations())await r.unregister()}catch{}
@@ -947,7 +953,7 @@ async function appUpdate(){say("جارٍ تحديث التطبيق…",1);
 ["personName","beneficiary"].forEach(i=>$(i).addEventListener("input",()=>{clearTimeout(SIT);SIT=setTimeout(simShow,350)}));
 function v23start(){
  onSnapshot(doc(fs,"meta","config"),s=>{CFG=s.exists()?s.data():{};applyCfg()},e=>say(err(e)+" [meta/config] — انشر آخر firestore.rules."));
- onSnapshot(query(collection(fs,"nc"),limit(3000)),s=>{NC=new Map();s.docs.forEach(d=>{const x=d.data();NC.set(NF(x.o),{id:d.id,...x})})},()=>{})}
+ setTimeout(()=>onSnapshot(query(collection(fs,"nc"),limit(3000)),s=>{NC=new Map();s.docs.forEach(d=>{const x=d.data();NC.set(NF(x.o),{id:d.id,...x})})},()=>{}),4000)}
 Object.assign(A,{upd:appUpdate,dk:()=>dkStart(),dkf:id=>dkStart($(id)),dks:()=>{if(!DK)return;const L=dkVis(),n=L[L.indexOf(DK.el)+1];try{DK.r.onend=DK.r.onresult=null;DK.r.abort()}catch{}if(!n)return dkStop("✓ اكتمل الإملاء — راجع البيانات ثم اضغط «إضافة».");DK.el=n;DK.miss=0;dkListen()},dkx:()=>dkStop("تم إيقاف الإملاء."),ad:adOpen,adx:()=>{$("ad").classList.add("hidden");document.body.style.overflow=""},adk:id=>adTab(id),adc:id=>adOp(id),
  ui:uiOpen,uix:()=>$("ui").classList.add("hidden"),uis:uiSave,uiz:uiReset,uic:id=>uiOp(id),
  pr:id=>printStart(id),prm:()=>printStart(mp),plr:()=>{if(!PTs().length)return say("لا توجد قوالب طباعة. أنشئ قالبًا من لوحة المدير.");PRID="*";if(PTs().length===1)return printList(PTs()[0]);psDraw(false)},
