@@ -176,3 +176,6 @@ button.b{font-size:calc(14px*var(--fz,1))}.ra button{font-size:calc(13px*var(--f
 #dkBar.hidden{display:none}.dkt{flex:1;min-width:0}.dkt b{display:block;font-size:14px}.dkt small{display:block;color:var(--mu);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #dkBar .b{flex:none;padding:8px 10px;font-size:13px}
 .ev>.hbt{display:flex;flex-direction:column;gap:6px;flex:none}
+/* v34 */
+#adP table td.ok{color:#3e8a55;font-weight:800;text-align:center}#adP table td.no{color:var(--mu);text-align:center}#adP table th:not(:first-child){text-align:center}
+#list .lvn{text-align:center;color:var(--mu)}
